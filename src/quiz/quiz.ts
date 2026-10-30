@@ -152,6 +152,7 @@ export function analysisOf(student: Student): string[] {
     tr("Драйверы: {v}", { v: driversOf(student.mbti).drivers.map((d) => pick(DRIVERS[d].name)).join(", ") }),
     tr("Запреты: {v}", { v: driversOf(student.mbti).bans.map((b) => pick(BANS[b])).join("; ") }),
     tr("Работает: {v}", { v: [type.works[0], motivate(top[0]), w.works[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
+    tr("Практика для развития: {v}", { v: EGO[top[0]].exercises[0] }),
     tr("Избегать: {v}", { v: [type.avoids[0], EGO[top[0]].avoid[0], w.avoids[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
   ];
 }

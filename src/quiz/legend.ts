@@ -61,12 +61,18 @@ export function legendOf(s: Student): Legend {
   const fold = (icon: string, head: string, lines: string[]) => (lines.length ? [{ icon, head, lines, fold: true }] : []);
   const note = LANG === "kk" ? [] : [tr("Оригинал ALQA на казахском языке")];
   const extra = [
+    ...fold("🎨", tr("Что любит: хобби и интересы"), [...note, ...part(["hobby"])]),
+    ...fold("🎭", tr("Роли и как его видят другие"), [...note, ...part(["roles"])]),
+    ...fold("⚖️", tr("Сильные и слабые стороны типа"), [...note, ...part(["traits"])]),
+    ...fold("📊", tr("Эго-состояния типа (слайд ALQA)"), [...note, ...part(["ego"])]),
+    ...fold("🔺", tr("Треугольник Карпмана"), [...note, ...part(["karpman"])]),
     ...fold("🧒", tr("Типичная история: детство и семья"), [...note, ...part(["childhood", "parents"])]),
     ...fold("🔗", tr("Драйверы и запреты"), [...note, ...part(["drivers"])]),
     ...fold("🏫", tr("Школьные годы"), [...note, ...part(["school", "strong", "weak"])]),
     ...fold("⚠️", tr("Возможные психологические проблемы"), [...note, ...part(["problems"])]),
     ...fold("😨", tr("Страхи"), [...note, ...part(["fears"])]),
     ...fold("🪞", tr("Самооценка"), [...note, ...part(["self"])]),
+    ...fold("🧭", tr("Рекомендации ALQA для развития"), [...note, ...part(["advice"])]),
   ].filter((x) => x.lines.length > note.length);
   return {
     title: tr("{name}, {age}, {city}", { name: s.name, age: s.age, city: s.city }),

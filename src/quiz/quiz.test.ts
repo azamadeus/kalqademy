@@ -56,14 +56,14 @@ describe("phrases", () => {
 import { WOUND_ORDER, WOUNDS } from "../data/wounds";
 import { analysisOf } from "./quiz";
 describe("wounds", () => {
-  it("each sensitive theme has school behaviour and phrases, and the analysis has seven lines", () => {
+  it("each sensitive theme has school behaviour and phrases, and the analysis has eight lines", () => {
     for (const w of WOUND_ORDER) {
       expect(WOUNDS[w].school.length).toBeGreaterThan(20);
       expect(WOUNDS[w].phrases.length).toBeGreaterThanOrEqual(5);
     }
     const s = createStudent({ seed: 11, blind: false });
     const lines = analysisOf(s);
-    expect(lines.length).toBe(7);
+    expect(lines.length).toBe(8);
     expect(lines.join(" ")).not.toMatch(/\{\w+\}/);
   });
 });
