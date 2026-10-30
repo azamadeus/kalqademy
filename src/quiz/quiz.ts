@@ -1,4 +1,5 @@
 import { EVENTS, type GameEvent } from "../data/events";
+import { familyById } from "../data/world";
 import { EGO } from "../data/ego";
 import { TYPES } from "../data/mbti";
 import { dominantEgo, styleScore } from "../game/engine";
@@ -64,7 +65,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
   const rng = mulberry32(student.seed * 31 + attempt * 7 + 3);
   const ego = dominantEgo(student);
   const rank = (e: GameEvent) =>
-    (e.prone?.ego?.includes(ego) ? 0 : 1) + (e.prone?.letters?.some((l) => student.mbti.includes(l)) ? 0 : 1) + rng() * 1.6;
+    (e.prone?.ego?.includes(ego) ? 0 : 1) + (e.prone?.letters?.some((l) => student.mbti.includes(l)) ? 0 : 1) + (familyById(student.familyId).boosts.includes(e.problem) ? 0 : 1) + rng() * 1.6;
   const pool = EVENTS.filter((e) => e.id !== "first-message")
     .map((e) => ({ e, r: rank(e) }))
     .sort((a, b) => a.r - b.r)

@@ -13,49 +13,56 @@ export interface Legend {
   sections: { icon: string; head: string; lines: string[] }[];
 }
 
-/** The student's backstory, built from their type, ego state, family, course and goal. Behaviour only, nothing about appearance. */
+const list = (a: string[], n: number) => a.slice(0, n).join("; ");
+const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+
+/**
+ * The student's backstory, built from the type, ego-state, family, course and goal data.
+ * Only behaviour, feelings and circumstances are used, never appearance. In the Kazakh version the
+ * type and ego-state wording comes from the original ALQA texts.
+ */
 export function legendOf(s: Student): Legend {
   const t = TYPES[s.mbti];
-  const ego = EGO[dominantEgo(s)];
+  const dom = dominantEgo(s);
+  const ego = EGO[dom];
   const w = WOUNDS[woundOf(s)];
   const goal = goalById(s.goalId);
   const fam = familyById(s.familyId);
   const course = courseById(s.courseId);
   const f = (x: string) => fmt(x, s);
-  if (LANG === "kk") return legendKk(s, goal.icon, `${goal.profession} · ${goal.uni}`, goal.subjects, fam.icon, fam.label, f(fam.voice), `💳 ${course.name} · ${course.price}`, f(course.voice), f(t.fearVoice), title(s));
-  return {
-    title: title(s),
-    sections: [
-      { icon: goal.icon, head: tr("Мечта"), lines: [`${goal.profession} · ${goal.uni}`, goal.subjects] },
-      { icon: "📚", head: tr("Учёба"), lines: [t.summary, `+ ${t.studentPlus.slice(0, 2).join(", ")}`, `− ${t.studentMinus.slice(0, 2).join(", ")}`, tr("🎓 Старт на пробнике: {mock}", { mock: s.mock })] },
-      { icon: fam.icon, head: tr("Семья и курс"), lines: [fam.label, f(fam.voice), `💳 ${course.name} · ${course.price}`, f(course.voice)] },
-      { icon: "🌀", head: tr("Тараканы в голове"), lines: [f(t.fearVoice), ego.coreProblem, w.theme, f(w.voice)] },
-    ],
-  };
-}
-
-const title = (s: Student) => tr("{name}, {age}, {city}", { name: s.name, age: s.age, city: s.city });
-
-/** Kazakh version: type and ego-state descriptions are the original ALQA texts, not a translation. */
-function legendKk(s: Student, gIcon: string, goalLine: string, subjects: string, fIcon: string, famLabel: string, famVoice: string, courseLine: string, courseVoice: string, fearVoice: string, head: string): Legend {
+  const kk = LANG === "kk";
   const to = TYPE_ORIGINAL[s.mbti];
-  const eo = EGO_ORIGINAL[dominantEgo(s)];
+  const eo = EGO_ORIGINAL[dom];
+
+  const aboutKk = to.about.filter((l) => l.length > 45 && !l.endsWith(":")).slice(0, 2);
+  const character = kk && aboutKk.length ? aboutKk : [t.summary, tr("Важно для него: {v}", { v: lower(t.motives).replace(/\.$/, "") })];
+  const strengths = t.studentPlus.slice(0, 3);
+  const hard = t.studentMinus.slice(0, 3);
+  const fears = kk && to.fears.length ? to.fears.slice(0, 3) : t.fears.slice(0, 3);
+  const beliefs = kk && eo.fears.length ? eo.fears.slice(0, 2) : ego.beliefs.slice(0, 2);
+  const scenarios = kk && eo.problems.length ? eo.problems.slice(0, 2) : ego.syndromes.slice(0, 2);
+
   return {
-    title: head,
+    title: tr("{name}, {age}, {city}", { name: s.name, age: s.age, city: s.city }),
     sections: [
-      { icon: gIcon, head: tr("Мечта"), lines: [goalLine, subjects] },
+      { icon: "👤", head: tr("Характер"), lines: character },
+      { icon: goal.icon, head: tr("Мечта"), lines: [`${goal.profession} · ${goal.uni}`, goal.subjects] },
       { icon: "📚", head: tr("Учёба"), lines: [
-        ...to.about.slice(0, 2),
-        ...(to.plus.length ? [`✅ ${to.plus.slice(0, 2).join(" · ")}`] : []),
-        ...(to.minus.length ? [`❌ ${to.minus.slice(0, 2).join(" · ")}`] : []),
+        tr("Сильные стороны: {v}", { v: list(strengths, 3) }),
+        tr("Сложности: {v}", { v: list(hard, 3) }),
+        tr("Привычные трудности: {v}", { v: list(t.problems, 3) }),
+        ...(kk && to.plus.length ? [`✅ Ынталандырады: ${list(to.plus, 2)}`] : []),
+        ...(kk && to.minus.length ? [`❌ Ынталандырмайды: ${list(to.minus, 2)}`] : []),
         tr("🎓 Старт на пробнике: {mock}", { mock: s.mock }),
       ] },
-      { icon: fIcon, head: tr("Семья и курс"), lines: [famLabel, famVoice, courseLine, courseVoice] },
+      { icon: fam.icon, head: tr("Семья и курс"), lines: [fam.label, f(fam.voice), `💳 ${course.name} · ${course.price}`, f(course.voice), ego.desc] },
       { icon: "🌀", head: tr("Тараканы в голове"), lines: [
-        fearVoice,
-        ...to.fears.slice(0, 2),
-        ...eo.fears.slice(0, 2),
-        ...(eo.problems.length || to.difficulties.length ? [[...to.difficulties.slice(0, 2), ...eo.problems.slice(0, 2)].join(" · ")] : []),
+        f(t.fearVoice),
+        tr("Боится: {v}", { v: list(fears, 3) }),
+        ...beliefs,
+        tr("Привычные сценарии: {v}", { v: list(scenarios, 2) }),
+        w.theme,
+        f(w.voice),
       ] },
     ],
   };
