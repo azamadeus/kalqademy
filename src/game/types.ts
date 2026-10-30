@@ -121,6 +121,16 @@ export interface PlanResult {
   xp: number;
 }
 
+export interface TurnRecord {
+  week: number;
+  eventId: string;
+  quality: Quality;
+  tactic: Tactic;
+  tone: Tone;
+  toneOk: boolean;
+  planned: boolean;
+}
+
 export interface CaseState {
   studentId: string;
   week: number;
@@ -144,6 +154,7 @@ export interface CaseState {
   msgSeq: number;
   plan?: Plan | null;
   planResult?: PlanResult | null;
+  history?: TurnRecord[];
 }
 
 export interface Curator {

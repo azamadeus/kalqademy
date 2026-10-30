@@ -193,6 +193,10 @@ export function act(g: GameState, studentId: string, optionIndex: number, tone: 
     doneEvents: [...c.doneEvents, ev.id],
     tones: [...c.tones, tone],
     last: { ...makeLast(ev.id, option.tactic, tone, s, why), planned: iv && planBonus > 0 ? iv.title : null },
+    history: [
+      ...(c.history ?? []),
+      { week: c.week, eventId: ev.id, quality: s.quality, tactic: option.tactic, tone, toneOk: s.judge.tone, planned: !!iv && planBonus > 0 },
+    ],
   };
   const skill = TACTICS[option.tactic].skill as SkillKey;
   return giveXp(putCase(g, c), XP_BY_QUALITY[s.quality], { [skill]: SKILL_BY_QUALITY[s.quality] });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Ring } from "./components/ui";
+import { Onboarding, Ring } from "./components/ui";
 import Career from "./pages/Career";
 import CaseView from "./pages/Case";
 import Home from "./pages/Home";
@@ -30,6 +30,13 @@ function Shell() {
   const { g, toasts, dismiss, addStudent } = useGame();
   const [view, setView] = useState<View>("home");
   const [sid, setSid] = useState<string | null>(null);
+  const [help, setHelp] = useState(() => {
+    try { return !localStorage.getItem("kalqademy:seen"); } catch { return false; }
+  });
+  const closeHelp = () => {
+    setHelp(false);
+    try { localStorage.setItem("kalqademy:seen", "1"); } catch { /* ignore */ }
+  };
   const go: Nav = (v, id) => {
     setView(v);
     if (id !== undefined) setSid(id);
@@ -59,6 +66,7 @@ function Shell() {
               <button key={t.id} className={`tab ${view === t.id ? "on" : ""}`} onClick={() => go(t.id)}>{t.label}</button>
             ))}
           </nav>
+          <button className="help-btn" aria-label="Как играть" title="Как играть" onClick={() => setHelp(true)}>?</button>
           <div className="chip-user" onClick={() => go("career")} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && go("career")}>
             <Ring value={into / need} size={38} stroke={4} color="#fbbf24" big={<span style={{ fontSize: "0.9rem" }}>{level}</span>} small="" />
             <div><strong>{g.curator.name}</strong><small>{rankOf(level).name}</small></div>
@@ -74,6 +82,8 @@ function Shell() {
         {view === "career" && <Career />}
         {view === "knowledge" && <Knowledge />}
       </div>
+
+      {help && <Onboarding onClose={closeHelp} />}
 
       <div className="toasts" aria-live="polite">
         {toasts.slice(-3).map((t) => (

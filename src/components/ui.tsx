@@ -3,7 +3,7 @@ import { GROUPS, groupOf } from "../data/mbti";
 import { CLOSENESS } from "../game/text";
 import { SKILLS } from "../game/career";
 import { STAGES, TOTAL_WEEKS, stageOf, closenessLevel } from "../game/engine";
-import type { Look, SkillKey, Student } from "../game/types";
+import type { Look, Quality, SkillKey, Student, TurnRecord } from "../game/types";
 import { clamp } from "../game/rng";
 
 const SKIN = ["#f5d0b5", "#e8b98f", "#d39b6e", "#b9784c", "#8d5a3a"];
@@ -169,4 +169,46 @@ export function Confetti({ fire }: { fire: number }) {
 export function Delta({ label, v, goodWhenDown }: { label: string; v: number; goodWhenDown?: boolean }) {
   const good = goodWhenDown ? v < 0 : v > 0;
   return <span className={`delta ${v === 0 ? "" : good ? "up" : "down"}`}>{label} {v > 0 ? "+" : ""}{v}</span>;
+}
+
+const DOT: Record<Quality, string> = { great: "#34d399", good: "#60a5fa", meh: "#fbbf24", bad: "#f87171" };
+
+export function TurnStrip({ history, week, total }: { history: TurnRecord[]; week: number; total: number }) {
+  return (
+    <div className="strip" aria-label="Ход сезона">
+      {Array.from({ length: total }, (_, i) => {
+        const h = history.find((x) => x.week === i + 1);
+        const cur = i + 1 === week;
+        return <span key={i} className={`dot ${cur ? "cur" : ""}`} title={`Неделя ${i + 1}`} style={h ? { background: DOT[h.quality] } : undefined}>{i + 1}</span>;
+      })}
+    </div>
+  );
+}
+
+export function Onboarding({ onClose }: { onClose: () => void }) {
+  const [i, setI] = useState(0);
+  const steps = [
+    { icon: "🎯", title: "Ваша задача", text: "Вы куратор онлайн-курса ЕНТ. За 12 недель подведите ученика к хорошему баллу и выстройте с ним доверие. У каждого ученика свой тип MBTI, эго-состояние, семья и чувствительная тема. Сначала профиль скрыт." },
+    { icon: "💬", title: "Каждую неделю: тон + тактика", text: "Ученик пишет о проблеме. Выберите тон (от отстранённого до очень тёплого) и один из четырёх вариантов ответа. Слишком близкий тон для малознакомых и слишком холодный для близких снижают доверие. Клавиши 1–4 выбирают ответ, Q W E R тон." },
+    { icon: "🔍", title: "Узнайте ученика", text: "Задавайте вопросы (некоторые открываются только при доверии), читайте ответы и делайте гипотезу о типе, эго-состоянии и чувствительной теме. Это не диагноз, а подсказка для общения." },
+    { icon: "🧭", title: "План и отчёт", text: "Составьте план развития с приёмами из воркбуков ALQA: он даёт бонус в подходящих ситуациях. В «Отчёте» проверьте свою гипотезу: ученик ответит, а система разберёт ошибки. При тревожных сигналах всегда привлекайте школьного психолога." },
+  ];
+  const st = steps[i];
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 560, textAlign: "center" }} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Как играть">
+        <div style={{ fontSize: "3rem" }}>{st.icon}</div>
+        <h2 style={{ margin: "8px 0" }}>{st.title}</h2>
+        <p className="muted" style={{ minHeight: 110 }}>{st.text}</p>
+        <div className="row" style={{ justifyContent: "center", gap: 6, margin: "10px 0 16px" }}>
+          {steps.map((_, k) => <i key={k} style={{ width: k === i ? 22 : 8, height: 8, borderRadius: 8, background: k === i ? "var(--accent)" : "rgba(255,255,255,0.2)", transition: "0.3s" }} />)}
+        </div>
+        <div className="row" style={{ justifyContent: "center" }}>
+          {i > 0 && <button className="btn ghost" onClick={() => setI(i - 1)}>Назад</button>}
+          {i < steps.length - 1 ? <button className="btn" onClick={() => setI(i + 1)}>Дальше</button> : <button className="btn" onClick={onClose}>Начать</button>}
+          <button className="btn ghost" onClick={onClose}>Пропустить</button>
+        </div>
+      </div>
+    </div>
+  );
 }

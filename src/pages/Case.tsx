@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Avatar, Bar, Confetti, Delta, Ladder, Ring, StageTrack, studentColor } from "../components/ui";
+import { Avatar, Bar, Confetti, Delta, Ladder, Ring, StageTrack, TurnStrip, studentColor } from "../components/ui";
+import { seasonReview } from "../game/review";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { eventById } from "../data/events";
 import { QUESTIONS } from "../data/questions";
@@ -30,6 +31,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
   const [showAsk, setShowAsk] = useState(false);
   const [typing, setTyping] = useState(false);
   const [fire, setFire] = useState(0);
+  const [react, setReact] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
   const prevLen = useRef(c?.log.length ?? 0);
   const prevFin = useRef(c?.finished ?? false);
@@ -53,6 +55,15 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [logLen, typing]);
 
+  const lastQ = c?.last?.quality;
+  const lastEv = c?.last?.eventId;
+  useEffect(() => {
+    if (!lastQ) return;
+    setReact(lastQ);
+    const t = setTimeout(() => setReact(""), 900);
+    return () => clearTimeout(t);
+  }, [lastQ, lastEv, c?.week]);
+
   const level = levelOf(g.curator.xp).level;
   const event = c?.eventId ? eventById(c.eventId) : undefined;
   const best = useMemo(() => {
@@ -60,6 +71,20 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
     const bt = bestTone(student, c.trust);
     return event.options.reduce((b, o, i) => (scoreChoice(student, c.trust, o, bt).raw > scoreChoice(student, c.trust, event.options[b], bt).raw ? i : b), 0);
   }, [student, c, event, level]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+      if (!student || !c || c.finished || c.acted || typing) return;
+      const idx = "1234".indexOf(e.key);
+      if (idx >= 0 && event?.options[idx]) act(student.id, idx, tone);
+      const ti = "qwer".indexOf(e.key.toLowerCase());
+      if (ti >= 0) setTone(ti as Tone);
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [student, c, event, typing, tone, act]);
 
   if (!student || !c) {
     return (
@@ -103,7 +128,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
       <aside className="side">
         <div className="panel student-card" style={{ ["--glow" as string]: `linear-gradient(135deg, ${color}88, transparent)` }}>
           <div style={{ display: "grid", placeItems: "center", marginBottom: 6 }}>
-            <Avatar look={student.look} gender={student.gender} size={132} color={color} mood={mood} stress={c.stress / 100} mark={c.stress > 75 ? "💢" : mood > 0.75 ? "✨" : undefined} />
+            <div className={`react ${react}`}><Avatar look={student.look} gender={student.gender} size={132} color={color} mood={mood} stress={c.stress / 100} mark={c.stress > 75 ? "💢" : mood > 0.75 ? "✨" : undefined} /></div>
           </div>
           <h2>{student.name}, {student.age}</h2>
           <p className="muted small">{student.city} · {goal.icon} {goal.profession}</p>
@@ -187,6 +212,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
               {g.students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
+          <TurnStrip history={c.history ?? []} week={c.week} total={TOTAL_WEEKS} />
           <div className="chat-log" ref={logRef}>
             {visible.map((m) => <div key={m.id} className={`msg ${m.from}`}>{m.text}</div>)}
             {typing && lastFrom === "student" && <div className="typing"><i /><i /><i /></div>}
@@ -208,6 +234,25 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
                 </div>
               </div>
             </div>
+            {(() => {
+              const r = seasonReview(c);
+              return (
+                <div style={{ textAlign: "left", marginTop: 22 }}>
+                  <div className="step-title">Разбор сезона · {r.total} ходов</div>
+                  <div className="review">
+                    <div className="cell"><b style={{ color: "#34d399" }}>{r.counts.great}</b><span className="xs muted">отлично</span></div>
+                    <div className="cell"><b style={{ color: "#60a5fa" }}>{r.counts.good}</b><span className="xs muted">хорошо</span></div>
+                    <div className="cell"><b style={{ color: "#fbbf24" }}>{r.counts.meh}</b><span className="xs muted">так себе</span></div>
+                    <div className="cell"><b style={{ color: "#f87171" }}>{r.counts.bad}</b><span className="xs muted">мимо</span></div>
+                  </div>
+                  <p className="xs muted">Точный тон: {Math.round(r.toneRate * 100)}% ходов · план сработал: {r.planned}</p>
+                  <div className="grid2" style={{ marginTop: 8 }}>
+                    <div><h4>Что получилось</h4>{r.strengths.map((t) => <div key={t} className="quote">✅ {t}</div>)}</div>
+                    <div><h4>Что улучшить</h4>{r.improve.length ? r.improve.map((t) => <div key={t} className="quote" style={{ borderColor: "#fbbf24", background: "rgba(251,191,36,0.07)" }}>⚠️ {t}</div>) : <div className="quote">Явных слабых мест не видно. Попробуйте более сложного ученика.</div>}</div>
+                  </div>
+                </div>
+              );
+            })()}
           </section>
         ) : showFeedback && last ? (
           <section className={`feedback ${last.quality}`}>
@@ -236,7 +281,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
         ) : (
           <section className="panel stack" style={{ gap: 18 }}>
             <div>
-              <div className="step-title">1. Тон общения</div>
+              <div className="step-title">1. Тон общения <span className="xs muted" style={{ textTransform: "none", letterSpacing: 0 }}>· клавиши Q W E R</span></div>
               <div className="tones">
                 {TONES.map((t) => (
                   <button key={t.id} className={`tone ${tone === t.id ? "on" : ""}`} onClick={() => setTone(t.id)}>
@@ -246,11 +291,11 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
               </div>
             </div>
             <div>
-              <div className="step-title">2. {event ? `«${event.title}»: ваш ход` : "Ваш ход"}</div>
+              <div className="step-title">2. {event ? `«${event.title}»: ваш ход` : "Ваш ход"} <span className="xs muted" style={{ textTransform: "none", letterSpacing: 0 }}>· клавиши 1–4</span></div>
               <div className="opts">
                 {event?.options.map((o, i) => (
                   <button key={i} className={`opt ${best === i ? "best" : ""}`} disabled={typing} onClick={() => act(student.id, i, tone)}>
-                    <span className="tag">{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}{best === i ? " · ✨ чутьё подсказывает" : ""}</span>
+                    <span className="tag"><span className="key">{i + 1}</span>{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}{best === i ? " · ✨ чутьё подсказывает" : ""}</span>
                     <div>{fmt(o.text, student)}</div>
                   </button>
                 ))}

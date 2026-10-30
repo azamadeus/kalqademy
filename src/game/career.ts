@@ -72,5 +72,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "top", icon: "🏆", name: "Высший балл", desc: "Ученик набрал 120+ баллов", check: (g) => cases(g).some((c) => (c.finalScore ?? 0) >= 120) },
   { id: "levelup", icon: "⭐", name: "Растущий наставник", desc: "Достичь 5 уровня куратора", check: (g) => levelOf(g.curator.xp).level >= 5 },
   { id: "plan", icon: "🧭", name: "Архитектор развития", desc: "Составить план развития на 80+ баллов", check: (g) => cases(g).some((c) => (c.planResult?.score ?? 0) >= 80) },
+  { id: "streak", icon: "🔥", name: "Серия", desc: "3 отличных хода подряд", check: (g) => cases(g).some((c) => { let n = 0; for (const h of c.history ?? []) { n = h.quality === "great" ? n + 1 : 0; if (n >= 3) return true; } return false; }) },
+  { id: "safe", icon: "🛟", name: "Безопасный ход", desc: "Правильно отреагировать на тревожный сигнал", check: (g) => cases(g).some((c) => (c.history ?? []).some((h) => h.eventId === "alarm" && (h.quality === "great" || h.quality === "good"))) },
+  { id: "tone", icon: "🎚️", name: "Мастер тона", desc: "10 ходов в одном сезоне с точным тоном", check: (g) => cases(g).some((c) => (c.history ?? []).filter((h) => h.toneOk).length >= 10) },
+  { id: "nolosses", icon: "💎", name: "Без потерь", desc: "Закончить сезон с доверием от 75 и стрессом до 40", check: (g) => cases(g).some((c) => c.finished && c.trust >= 75 && c.stress <= 40) },
   { id: "three", icon: "📋", name: "Опыт в деле", desc: "Завершить 3 сезона с учениками", check: (g) => g.curator.casesFinished >= 3 },
 ];

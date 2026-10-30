@@ -53,6 +53,17 @@ export default function Home({ go, demo }: { go: Nav; demo: () => void }) {
         <div className="panel stat"><b>{avg ?? "—"}</b><span className="muted">средний балл ЕНТ</span></div>
       </section>
 
+      <section className="steps4">
+        {[
+          ["🧬", "Соберите ученика", "Тип, эго-состояние, семья, курс. Или случайный."],
+          ["💬", "Ведите диалог", "Тон общения и тактика на каждой неделе."],
+          ["🧭", "Составьте план", "Приёмы из воркбуков ALQA дают бонус."],
+          ["📝", "Сдайте отчёт", "Ученик ответит, система разберёт ошибки."],
+        ].map(([ic, t, d], i) => (
+          <div key={t} className="step4"><span className="n">{i + 1}</span><div style={{ fontSize: "1.6rem" }}>{ic}</div><b>{t}</b><p className="muted small">{d}</p></div>
+        ))}
+      </section>
+
       <section className="grid3">
         <div className="feature"><div className="ic">🧬</div><h3>Живые ученики</h3><p className="muted small" style={{ marginTop: 6 }}>16 типов MBTI × 5 эго-состояний, семья, онлайн-курс, цель. Профиль скрыт, его нужно распознать.</p></div>
         <div className="feature"><div className="ic">💬</div><h3>Диалог и тон</h3><p className="muted small" style={{ marginTop: 6 }}>Отстранённо, нейтрально, хорошо, очень тепло. Слишком близко для чужих людей, слишком холодно для друзей: ученик это почувствует.</p></div>

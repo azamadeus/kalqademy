@@ -11,6 +11,7 @@ import { bestTone, dominantEgo, stageOf, woundOf } from "./engine";
 import { WOUND_ORDER, WOUNDS, ETHICS_RULES } from "../data/wounds";
 import { createStudent } from "./generate";
 import { fmt } from "./text";
+import { seasonReview } from "./review";
 
 describe("content integrity", () => {
   it("has all 16 types and 5 ego states", () => {
@@ -87,6 +88,23 @@ describe("sensitive themes (behavioural model)", () => {
     expect(fits.listen).toBeGreaterThanOrEqual(2);
     expect(fits.family).toBeGreaterThanOrEqual(2);
     expect(fits.play).toBeLessThan(0);
+  });
+});
+
+describe("season review", () => {
+  it("summarises a played season", () => {
+    let g = newGame();
+    const st = createStudent({ seed: 12 });
+    g = addStudent(g, st);
+    for (let w = 0; w < 12; w++) {
+      g = act(g, st.id, w % 4, 1);
+      g = advance(g, st.id);
+    }
+    const r = seasonReview(g.cases[st.id]);
+    expect(r.total).toBe(12);
+    expect(r.counts.great + r.counts.good + r.counts.meh + r.counts.bad).toBe(12);
+    expect(r.strengths.length).toBeGreaterThan(0);
+    expect(r.improve.some((t) => /План/.test(t))).toBe(true);
   });
 });
 
