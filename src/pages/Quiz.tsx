@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Avatar, Confetti, Ring, studentColor } from "../components/ui";
 import { phrasesOf, woundPhrasesOf } from "../data/phrases";
+import { driverSays } from "../quiz/legend";
 import { woundOf } from "../game/engine";
 import { TACTICS, fmt } from "../game/text";
 import type { Student } from "../game/types";
@@ -16,9 +17,10 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   const color = studentColor(student, true);
   const phrases = phrasesOf(student.mbti);
   const wPhrases = woundPhrasesOf(woundOf(student));
+  const dPhrases = driverSays(student.mbti);
   /** The student's message, followed by a phrase typical for their type (not in a safety-critical situation). */
   const speech = (q: (typeof quiz)[number], n: number) =>
-    q.event.serious || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 2 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
+    q.event.serious || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 3 === 1 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : n % 3 === 2 && dPhrases.length ? dPhrases[(n + student.seed) % dPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
 
   const retry = () => { setAttempt((a) => a + 1); setI(0); setAnswers([]); setChosen(null); };
 

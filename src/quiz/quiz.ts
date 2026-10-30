@@ -4,6 +4,7 @@ import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES } from "../data/mbti";
 import { dominantEgo, styleScore, woundOf } from "../game/engine";
 import { WOUNDS } from "../data/wounds";
+import { BANS, DRIVERS, driversOf, pick } from "../data/drivers";
 import { createStudent } from "../game/generate";
 import { TYPE_CODES } from "../data/mbti";
 import { mulberry32 } from "../game/rng";
@@ -125,6 +126,8 @@ export function hintFor(student: Student, q: Question, chosen: number, n = 0): s
     const w = WOUNDS[woundOf(student)];
     lines.push(tr("Для темы «{name}» важно: {works}. Избегать: {avoids}.", { name: w.name, works: pickOf(w.works, 0).toLowerCase(), avoids: pickOf(w.avoids, 0).toLowerCase() }));
   }
+  const main = driversOf(student.mbti).drivers[0];
+  if (main && !q.event.serious && n % 2 === 0) lines.push(tr("Главный драйвер «{name}». Что помогает: {v}.", { name: pick(DRIVERS[main].name), v: pick(DRIVERS[main].permission).toLowerCase() }));
   const o = q.event.options[chosen];
   if (o.fit < 1) lines.push(tr("Для самой ситуации решение было слабым."));
   else lines.push(tr("Подход не совпал с тем, что нужно ученику ({v}, {mbti}).", { v: ego.name, mbti: student.mbti }));
@@ -146,6 +149,8 @@ export function analysisOf(student: Student): string[] {
     tr("Тип: {v}", { v: `${student.mbti} «${type.nick}»` }),
     tr("Эго-состояния: {v}", { v: `${top.map((k) => `${EGO[k].emoji} ${EGO[k].name} ${student.ego[k]}`).join(", ")}; ${EGO[low].emoji} ${EGO[low].name} ${student.ego[low]}` }),
     tr("Чувствительная тема: {name}", { name: `${w.emoji} ${w.name}` }),
+    tr("Драйверы: {v}", { v: driversOf(student.mbti).drivers.map((d) => pick(DRIVERS[d].name)).join(", ") }),
+    tr("Запреты: {v}", { v: driversOf(student.mbti).bans.map((b) => pick(BANS[b])).join("; ") }),
     tr("Работает: {v}", { v: [type.works[0], motivate(top[0]), w.works[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
     tr("Избегать: {v}", { v: [type.avoids[0], EGO[top[0]].avoid[0], w.avoids[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
   ];

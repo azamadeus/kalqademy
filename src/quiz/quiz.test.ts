@@ -56,14 +56,23 @@ describe("phrases", () => {
 import { WOUND_ORDER, WOUNDS } from "../data/wounds";
 import { analysisOf } from "./quiz";
 describe("wounds", () => {
-  it("each sensitive theme has school behaviour and phrases, and the analysis has five lines", () => {
+  it("each sensitive theme has school behaviour and phrases, and the analysis has seven lines", () => {
     for (const w of WOUND_ORDER) {
       expect(WOUNDS[w].school.length).toBeGreaterThan(20);
       expect(WOUNDS[w].phrases.length).toBeGreaterThanOrEqual(5);
     }
     const s = createStudent({ seed: 11, blind: false });
     const lines = analysisOf(s);
-    expect(lines.length).toBe(5);
+    expect(lines.length).toBe(7);
     expect(lines.join(" ")).not.toMatch(/\{\w+\}/);
+  });
+});
+
+import { DRIVERS, TYPE_DRIVERS } from "../data/drivers";
+describe("drivers", () => {
+  it("every type has main drivers and the ENFJ ones match the curator's description", () => {
+    for (const mbti of TYPE_CODES) expect(TYPE_DRIVERS[mbti].drivers.length).toBeGreaterThanOrEqual(2);
+    expect(TYPE_DRIVERS.ENFJ.drivers.slice(0, 2)).toEqual(["please", "try"]);
+    for (const k of Object.keys(DRIVERS) as (keyof typeof DRIVERS)[]) expect(DRIVERS[k].says.length).toBeGreaterThanOrEqual(3);
   });
 });

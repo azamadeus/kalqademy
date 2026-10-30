@@ -8,6 +8,7 @@ import type { Student } from "../game/types";
 import { LANG, tr } from "../i18n";
 import type { EgoKey } from "../game/types";
 import { phrasesOf, woundPhrasesOf } from "../data/phrases";
+import { BANS, DRIVERS, driversOf, pick } from "../data/drivers";
 import { EGO_ORIGINAL, TYPE_ORIGINAL } from "./original-kk";
 import { TYPE_PDF } from "./pdf-kk";
 
@@ -89,6 +90,10 @@ export function legendOf(s: Student): Legend {
         ...beliefs,
         tr("Привычные сценарии: {v}", { v: list(scenarios, 2) }),
       ] },
+      { icon: "🎛️", head: tr("Драйверы и запреты типа"), lines: [
+        ...driversOf(s.mbti).drivers.map((d, i) => `${i === 0 ? "★ " : ""}${pick(DRIVERS[d].name)}: ${pick(DRIVERS[d].shows)}. «${f(pick(DRIVERS[d].says[0]))}»`),
+        tr("Запреты: {v}", { v: driversOf(s.mbti).bans.map((b) => pick(BANS[b])).join("; ") }),
+      ] },
       { icon: w.emoji, head: tr("Чувствительная тема: {name}", { name: w.name }), lines: [
         w.theme,
         f(w.voice),
@@ -97,7 +102,10 @@ export function legendOf(s: Student): Legend {
         tr("В школе: {v}", { v: lower(w.school) }),
         tr("Как это проявляется: {v}", { v: list(w.signs, 3) }),
       ] },
-      { icon: "💬", head: tr("Любимые слова и фразы"), lines: [...phrasesOf(s.mbti).slice(0, 4), ...woundPhrasesOf(woundOf(s)).slice(0, 3)].map((x) => `«${f(x)}»`) },
+      { icon: "💬", head: tr("Любимые слова и фразы"), lines: [...phrasesOf(s.mbti).slice(0, 3), ...driverSays(s.mbti).slice(0, 2), ...woundPhrasesOf(woundOf(s)).slice(0, 2)].map((x) => `«${f(x)}»`) },
     ],
   };
 }
+
+/** Phrases of the type's main drivers in the current language. */
+export const driverSays = (mbti: string): string[] => driversOf(mbti).drivers.slice(0, 2).flatMap((d) => DRIVERS[d].says.map(pick));
