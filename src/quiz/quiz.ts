@@ -1,11 +1,10 @@
 import { EVENTS, type GameEvent } from "../data/events";
 import { familyById } from "../data/world";
-import { EGO } from "../data/ego";
+import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES } from "../data/mbti";
 import { dominantEgo, styleScore } from "../game/engine";
 import { createStudent } from "../game/generate";
 import { TYPE_CODES } from "../data/mbti";
-import { EGO_ORDER } from "../data/ego";
 import { mulberry32 } from "../game/rng";
 import { fmt } from "../game/text";
 import type { Student, Tactic } from "../game/types";
@@ -102,19 +101,24 @@ export function hintFor(student: Student, q: Question, chosen: number, n = 0): s
   const ego = EGO[dom];
   const type = TYPES[student.mbti];
   const k = n + (student.seed % 5);
-  const pickOf = <T,>(a: T[]) => a[k % a.length];
+  const pickOf = <T,>(a: T[], off: number) => a[(k + off) % a.length];
   const lines: string[] = [];
   if (q.event.serious) {
     lines.push(tr("⚠️ В реальной ситуации с такими словами: выслушать, не обещать тайну и сразу привлечь школьного психолога и ответственных взрослых."));
-  } else if (LANG === "kk") {
-    const eo = EGO_ORIGINAL[dom];
-    const to = TYPE_ORIGINAL[student.mbti];
-    if (eo.motivate.length) lines.push(`${ego.name}: ${pickOf(eo.motivate)}`);
-    if (eo.say.length) lines.push(`💬 ${pickOf(eo.say)}`);
-    if (to.plus.length) lines.push(`${student.mbti}: ${pickOf(to.plus)}`);
   } else {
-    lines.push(tr("Как мотивировать «{ego}»: {how}. Можно сказать: {say}", { ego: ego.name, how: pickOf(ego.motivate).toLowerCase(), say: pickOf(ego.say) }));
-    lines.push(tr("Для типа {mbti} хорошо работает: {how}.", { mbti: student.mbti, how: pickOf(type.works).toLowerCase() }));
+    const tops = EGO_ORDER.slice().sort((x, y) => student.ego[y] - student.ego[x]).slice(0, 2);
+    tops.forEach((key, idx) => {
+      const e = EGO[key];
+      if (LANG === "kk") {
+        const eo = EGO_ORIGINAL[key];
+        if (eo.motivate.length) lines.push(`${e.name}: ${pickOf(eo.motivate, idx)}`);
+        if (idx === 0 && eo.say.length) lines.push(`💬 ${pickOf(eo.say, idx)}`);
+      } else {
+        lines.push(tr("Как мотивировать «{ego}»: {how}. Можно сказать: {say}", { ego: e.name, how: pickOf(e.motivate, idx).toLowerCase(), say: pickOf(e.say, idx) }));
+      }
+    });
+    if (LANG === "kk" && TYPE_ORIGINAL[student.mbti].plus.length) lines.push(`${student.mbti}: ${pickOf(TYPE_ORIGINAL[student.mbti].plus, 0)}`);
+    else lines.push(tr("Для типа {mbti} хорошо работает: {how}.", { mbti: student.mbti, how: pickOf(type.works, 0).toLowerCase() }));
   }
   const o = q.event.options[chosen];
   if (o.fit < 1) lines.push(tr("Для самой ситуации решение было слабым."));

@@ -21,7 +21,25 @@ export default function Legend({ student, start, back }: { student: Student; sta
           <span className="pill">{ego.emoji} {ego.name}</span>
         </div>
       </div>
-      {lg.sections.map((sec) => (
+      <div className="card">
+        <div className="step-title">📊 {tr("Эгограмма")}</div>
+        {lg.egogram.map((r) => (
+          <div key={r.key} className="egorow">
+            <div className="row" style={{ justifyContent: "space-between" }}>
+              <b className="small">{r.emoji} {r.name}</b>
+              <span className="xs muted">{r.level === "high" ? tr("Высокий") : r.level === "low" ? tr("Низкий") : tr("Средний")} · {r.value}</span>
+            </div>
+            <div className="thin" style={{ margin: "6px 0" }}><i style={{ width: `${r.value}%`, background: r.color }} /></div>
+            {r.text && <p className="xs muted">{r.text}</p>}
+          </div>
+        ))}
+      </div>
+      {lg.sections.map((sec) => sec.fold ? (
+        <details key={sec.head} className="card fold">
+          <summary>{sec.icon} {sec.head}</summary>
+          {sec.lines.map((l, i) => <p key={i} className="small muted" style={{ marginTop: 8 }}>{l}</p>)}
+        </details>
+      ) : (
         <div key={sec.head} className="card">
           <div className="step-title">{sec.icon} {sec.head}</div>
           {sec.lines.map((l, i) => <p key={i} className={i ? "small muted" : ""} style={{ marginTop: i ? 6 : 0 }}>{l}</p>)}

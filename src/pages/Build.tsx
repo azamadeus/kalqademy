@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, studentColor } from "../components/ui";
 import { EGO, EGO_ORDER } from "../data/ego";
+import { TYPE_EGO } from "../data/egogram";
 import { TYPES, TYPE_CODES } from "../data/mbti";
 import { createStudent } from "../game/generate";
 import type { EgoKey, Student } from "../game/types";
@@ -8,11 +9,13 @@ import { tr } from "../i18n";
 
 export default function Build({ done, back }: { done: (s: Student) => void; back: () => void }) {
   const [mbti, setMbti] = useState("ENFP");
-  const [ego, setEgo] = useState<EgoKey>("natural_child");
+  const [egogram, setEgogram] = useState<Record<EgoKey, number>>({ ...TYPE_EGO.ENFP });
   const [gender, setGender] = useState<"f" | "m">("f");
   const [name, setName] = useState("");
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 900000) + 100);
-  const st = useMemo(() => createStudent({ seed, mbti, dominant: ego, gender, name: name.trim() || undefined, blind: false }), [seed, mbti, ego, gender, name]);
+  useEffect(() => { setEgogram({ ...TYPE_EGO[mbti] }); }, [mbti]);
+  const st = useMemo(() => createStudent({ seed, mbti, ego: egogram, gender, name: name.trim() || undefined, blind: false }), [seed, mbti, egogram, gender, name]);
+  const top = EGO_ORDER.slice().sort((a, b) => egogram[b] - egogram[a])[0];
 
   return (
     <div className="stack" style={{ gap: 22 }}>
@@ -22,7 +25,7 @@ export default function Build({ done, back }: { done: (s: Student) => void; back
           <Avatar look={st.look} gender={st.gender} size={110} color={studentColor(st, true)} mood={0.7} stress={0.2} />
         </div>
         <h3 style={{ marginTop: 8 }}>{st.name}, {st.age}</h3>
-        <p className="muted small">{st.mbti} «{TYPES[st.mbti].nick}» · {EGO[ego].emoji} {EGO[ego].name}</p>
+        <p className="muted small">{st.mbti} «{TYPES[st.mbti].nick}» · {EGO[top].emoji} {EGO[top].name}</p>
       </div>
 
       <div>
@@ -34,13 +37,15 @@ export default function Build({ done, back }: { done: (s: Student) => void; back
         </div>
       </div>
       <div>
-        <div className="step-title"><span className="num">2</span>{tr("Доминирующее эго-состояние")}</div>
-        <div className="stack" style={{ gap: 8 }}>
+        <div className="step-title"><span className="num">2</span>{tr("Эгограмма: все пять состояний")}</div>
+        <div className="sliders">
           {EGO_ORDER.map((k) => (
-            <button key={k} className={`choice ${ego === k ? "on" : ""}`} onClick={() => setEgo(k)}>
-              <b>{EGO[k].emoji} {EGO[k].name}</b><div className="xs muted">{EGO[k].coreProblem}</div>
-            </button>
+            <label key={k}>
+              <span className="row" style={{ justifyContent: "space-between" }}><b className="small">{EGO[k].emoji} {EGO[k].name}</b><span className="xs muted">{egogram[k]}</span></span>
+              <input type="range" min={0} max={100} value={egogram[k]} aria-label={EGO[k].name} onChange={(e) => setEgogram({ ...egogram, [k]: +e.target.value })} />
+            </label>
           ))}
+          <button className="link" style={{ justifySelf: "start" }} onClick={() => setEgogram({ ...TYPE_EGO[mbti] })}>{tr("Типичная эгограмма для типа")}</button>
         </div>
       </div>
       <div>
