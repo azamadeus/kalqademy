@@ -1,61 +1,153 @@
 export type Letter = "E" | "I" | "S" | "N" | "T" | "F" | "J" | "P";
-export type Ego = "parent" | "adult" | "child";
-export type Skill = "empathy" | "structure" | "motivation" | "family";
+export type Group = "analyst" | "diplomat" | "sentinel" | "explorer";
+export type EgoKey =
+  | "caring_parent"
+  | "critical_parent"
+  | "adult"
+  | "adapted_child"
+  | "natural_child";
+export type Tactic = "listen" | "plan" | "goal" | "challenge" | "space" | "family" | "play";
+export type Tone = 0 | 1 | 2 | 3;
+export type SkillKey =
+  | "empathy"
+  | "structure"
+  | "motivation"
+  | "boundaries"
+  | "family"
+  | "diagnostics";
+export type Stage = "meet" | "diagnose" | "trust" | "work" | "exam";
+export type Karpman = "rescuer" | "persecutor" | "victim";
+export type Quality = "great" | "good" | "meh" | "bad";
 
-export interface Stats {
-  trust: number;
-  motivation: number;
-  stress: number;
+export type ProblemKey =
+  | "motivation"
+  | "anxiety"
+  | "perfectionism"
+  | "family"
+  | "course"
+  | "burnout"
+  | "comparison"
+  | "goal"
+  | "boundaries"
+  | "discipline"
+  | "money"
+  | "social";
+
+export interface Look {
+  skin: number;
+  hair: number;
+  hairColor: number;
+  accessory: number;
 }
 
 export interface Student {
   id: string;
   name: string;
+  gender: "f" | "m";
   age: number;
+  city: string;
   mbti: string;
-  ego: Record<Ego, number>;
-  goal: string;
-  bio: string;
-  start: Stats;
+  ego: Record<EgoKey, number>;
+  familyId: string;
+  courseId: string;
+  goalId: string;
+  mock: number;
+  seed: number;
+  look: Look;
+  /** Hidden profile: MBTI/ego are not shown until discovered. */
+  blind: boolean;
 }
 
-/** Extra effect applied only when the student matches the condition. */
-export interface Modifier {
-  letter?: Letter;
-  ego?: Ego;
-  delta: Partial<Stats>;
-  note: string;
-}
-
-export interface Option {
-  id: string;
+export interface Msg {
+  id: number;
+  from: "student" | "curator" | "system";
   text: string;
-  delta: Partial<Stats>;
-  xp: Partial<Record<Skill, number>>;
-  feedback: string;
-  modifiers?: Modifier[];
+  tone?: Tone;
 }
 
-export interface Scenario {
-  id: string;
+export interface Hypothesis {
+  letters: Partial<Record<"EI" | "SN" | "TF" | "JP", Letter>>;
+  ego?: EgoKey;
+}
+
+export interface Judgement {
+  situation: boolean;
+  style: boolean;
+  tone: boolean;
+}
+
+export interface LastTurn {
+  eventId: string;
+  tactic: Tactic;
+  tone: Tone;
+  quality: Quality;
+  judge: Judgement;
+  dTrust: number;
+  dMotivation: number;
+  dStress: number;
+  dKnowledge: number;
+  intrusive: boolean;
+  tooCold: boolean;
+  why: string[];
+}
+
+export interface CaseState {
   studentId: string;
-  title: string;
-  text: string;
-  options: Option[];
+  week: number;
+  trust: number;
+  motivation: number;
+  stress: number;
+  knowledge: number;
+  revealed: string[];
+  asked: string[];
+  eventId: string | null;
+  acted: boolean;
+  doneEvents: string[];
+  log: Msg[];
+  questionsLeft: number;
+  hypothesis: Hypothesis;
+  last: LastTurn | null;
+  tones: number[];
+  finished: boolean;
+  finalScore: number | null;
+  reports: ReportResult[];
+  msgSeq: number;
 }
 
 export interface Curator {
+  name: string;
   xp: number;
-  skills: Record<Skill, number>;
+  skills: Record<SkillKey, number>;
+  casesFinished: number;
 }
 
-export type Rating = "good" | "ok" | "bad";
+export interface ReportInput {
+  letters: Partial<Record<"EI" | "SN" | "TF" | "JP", Letter>>;
+  ego: EgoKey | null;
+  tone: Tone | null;
+  tactics: Tactic[];
+  note: string;
+}
 
-export interface Outcome {
-  stats: Stats;
-  delta: Stats;
-  notes: string[];
-  xpGain: number;
-  skillGain: Partial<Record<Skill, number>>;
-  rating: Rating;
+export interface ReportResult {
+  at: number;
+  week: number;
+  input: ReportInput;
+  score: number;
+  lettersCorrect: number;
+  egoCorrect: boolean;
+  toneScore: number;
+  tacticsHit: number;
+  studentMessage: string;
+  expert: string[];
+  xp: number;
+}
+
+export interface GameState {
+  version: number;
+  curator: Curator;
+  students: Student[];
+  cases: Record<string, CaseState>;
+  achievements: string[];
+  seq: number;
 }
