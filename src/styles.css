@@ -330,3 +330,10 @@ body { background: var(--bg); }
 @media (max-width: 520px) { .meters { grid-template-columns: repeat(2, 1fr); } .nav { flex-wrap: wrap; } .links { order: 3; flex-basis: 100%; } }
 .nav { position: static; }
 .feedback.great, .feedback.good, .feedback.meh, .feedback.bad { background: var(--panel); }
+.types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.types .choice { padding: 8px 6px; text-align: center; }
+.types .choice b { letter-spacing: 1px; }
+.opt.ok { border-color: var(--good); background: rgba(52,211,153,0.12); }
+.opt.no { border-color: var(--bad); background: rgba(248,113,113,0.1); }
+.opt:disabled { cursor: default; }
+@media (max-width: 520px) { .types { grid-template-columns: repeat(2, 1fr); } }
