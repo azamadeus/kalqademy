@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Avatar, Bar, studentColor } from "../components/ui";
+import { Avatar, studentColor } from "../components/ui";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES, TYPE_CODES } from "../data/mbti";
 import { WOUND_ORDER, WOUNDS, type WoundKey } from "../data/wounds";
-import { COURSES, FAMILIES, GOALS, courseById, familyById, goalById } from "../data/world";
+import { COURSES, FAMILIES, GOALS, familyById, goalById } from "../data/world";
 import { createStudent } from "../game/generate";
 import { useGame } from "../game/store";
 import type { EgoKey } from "../game/types";
@@ -63,16 +63,25 @@ export default function Studio({ go }: { go: Nav }) {
 
   const color = studentColor(st, true);
   return (
-    <div className="stack">
-      <div className="row wrap" style={{ justifyContent: "space-between" }}>
-        <div><h2>{tr("Студия учеников")}</h2><p className="muted small">{tr("Соберите ученика по своему желанию или получите случайного. Параметры можно скрыть: тогда профиль придётся диагностировать.")}</p></div>
-        <div className="row wrap">
-          <button className="btn ghost" onClick={randomize}>{tr("🎲 Случайный")}</button>
-          <button className="btn ghost" onClick={group}>{tr("👥 Случайная группа (4, вслепую)")}</button>
+    <div className="stack" style={{ gap: 20 }}>
+      <div className="center">
+        <h2>{tr("Студия учеников")}</h2>
+      </div>
+      <div className="card center">
+        <div style={{ display: "grid", placeItems: "center" }}>
+          <Avatar look={st.look} gender={st.gender} size={120} color={color} mood={0.7} stress={0.2} />
+        </div>
+        <h2 style={{ marginTop: 10 }}>{st.name}, {st.age}</h2>
+        <p className="muted small">{st.city} · {goalById(st.goalId).icon} {goalById(st.goalId).profession}</p>
+        <p className="muted small" style={{ marginTop: 4 }}>{familyById(st.familyId).icon} {familyById(st.familyId).label}</p>
+        <div className="row wrap" style={{ justifyContent: "center", marginTop: 18 }}>
+          <button className="btn lg" onClick={add}>{tr("Добавить и начать →")}</button>
+          <button className="btn lg ghost" onClick={randomize}>{tr("🎲 Случайный")}</button>
         </div>
       </div>
-      <div className="grid2" style={{ gridTemplateColumns: "1.2fr 0.8fr", alignItems: "start" }}>
-        <div className="panel">
+      <details>
+        <summary>{tr("Настроить вручную")}</summary>
+        <div className="stack" style={{ marginTop: 14 }}>
           <div className="grid2">
             <div className="field"><label>{tr("Имя (необязательно)")}</label><input type="text" value={name} placeholder={tr("Случайное")} onChange={(e) => setName(e.target.value)} /></div>
             <div className="field"><label>{tr("Пол")}</label><div className="seg"><button className={gender === "f" ? "on" : ""} onClick={() => setGender("f")}>{tr("Девушка")}</button><button className={gender === "m" ? "on" : ""} onClick={() => setGender("m")}>{tr("Парень")}</button></div></div>
@@ -118,25 +127,8 @@ export default function Studio({ go }: { go: Nav }) {
           </label>
         </div>
 
-        <div className="panel center" style={{ position: "sticky", top: 76 }}>
-          <div style={{ display: "grid", placeItems: "center" }}>
-            <Avatar look={st.look} gender={st.gender} size={150} color={color} mood={0.7} stress={0.2} />
-          </div>
-          <h2 style={{ marginTop: 10 }}>{st.name}, {st.age}</h2>
-          <p className="muted small">{st.city}</p>
-          <div className="row wrap gap8" style={{ justifyContent: "center", margin: "10px 0" }}>
-            <span className="pill">{st.mbti} · {TYPES[st.mbti].nick}</span>
-            <span className="pill">{EGO[dom].emoji} {EGO[dom].short}</span>
-            <span className="pill">{goalById(st.goalId).icon} {goalById(st.goalId).profession}</span>
-          </div>
-          <p className="small muted" style={{ textAlign: "left" }}>{TYPES[st.mbti].summary}</p>
-          <div style={{ textAlign: "left", marginTop: 12 }}>
-            {EGO_ORDER.map((k) => <Bar key={k} label={EGO[k].name} value={st.ego[k]} color={EGO[k].color} />)}
-          </div>
-          <p className="xs muted" style={{ textAlign: "left" }}>{familyById(st.familyId).icon} {familyById(st.familyId).label}<br />💳 {courseById(st.courseId).name}</p>
-          <button className="btn lg" style={{ width: "100%", marginTop: 14 }} onClick={add}>{tr("Добавить и начать →")}</button>
-        </div>
-      </div>
+      </details>
+      <div className="center"><button className="link" onClick={group}>{tr("👥 Случайная группа (4, вслепую)")}</button></div>
     </div>
   );
 }

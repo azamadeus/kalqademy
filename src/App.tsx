@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Onboarding, Ring } from "./components/ui";
+import { Onboarding } from "./components/ui";
 import Career from "./pages/Career";
 import CaseView from "./pages/Case";
 import Home from "./pages/Home";
@@ -8,7 +8,6 @@ import Knowledge from "./pages/Knowledge";
 import Report from "./pages/Report";
 import Roster from "./pages/Roster";
 import Studio from "./pages/Studio";
-import { levelOf, rankOf } from "./game/career";
 import { createStudent } from "./game/generate";
 import { GameProvider, useGame } from "./game/store";
 import { LANG, setLang, tr } from "./i18n";
@@ -16,19 +15,14 @@ import { LANG, setLang, tr } from "./i18n";
 export type View = "home" | "roster" | "studio" | "case" | "plan" | "report" | "career" | "knowledge";
 export type Nav = (v: View, sid?: string) => void;
 
-const TABS: { id: View; label: string }[] = [
-  { id: "home", label: tr("Главная") },
+const LINKS: { id: View; label: string }[] = [
   { id: "roster", label: tr("Ученики") },
-  { id: "studio", label: tr("Студия") },
-  { id: "case", label: tr("Диалог") },
-  { id: "plan", label: tr("План") },
-  { id: "report", label: tr("Отчёт") },
   { id: "career", label: tr("Путь куратора") },
   { id: "knowledge", label: tr("База знаний") },
 ];
 
 function Shell() {
-  const { g, toasts, dismiss, addStudent } = useGame();
+  const { toasts, dismiss, addStudent } = useGame();
   const [view, setView] = useState<View>("home");
   const [sid, setSid] = useState<string | null>(null);
   const [help, setHelp] = useState(() => {
@@ -48,7 +42,6 @@ function Shell() {
     addStudent(s);
     go("case", s.id);
   };
-  const { level, into, need } = levelOf(g.curator.xp);
 
   useEffect(() => {
     if (!toasts.length) return;
@@ -58,21 +51,16 @@ function Shell() {
 
   return (
     <>
-      <div className="bg" aria-hidden><div className="orb o1" /><div className="orb o2" /><div className="orb o3" /></div>
       <div className="app">
         <header className="nav">
-          <button className="brand" onClick={() => go("home")}><span className="logo">🎓</span>Kalqademy</button>
-          <nav className="tabs" aria-label={tr("Разделы")}>
-            {TABS.map((t) => (
-              <button key={t.id} className={`tab ${view === t.id ? "on" : ""}`} onClick={() => go(t.id)}>{t.label}</button>
+          <button className="brand" onClick={() => go("home")}>Kalqademy</button>
+          <nav className="links" aria-label={tr("Разделы")}>
+            {LINKS.map((t) => (
+              <button key={t.id} className={`navlink ${view === t.id ? "on" : ""}`} onClick={() => go(t.id)}>{t.label}</button>
             ))}
           </nav>
-          <button className="help-btn" aria-label={tr("Как играть")} title={tr("Как играть")} onClick={() => setHelp(true)}>?</button>
-          <button className="help-btn" style={{ width: "auto", padding: "0 10px" }} aria-label={tr("Язык")} title={tr("Язык")} onClick={() => setLang(LANG === "kk" ? "ru" : "kk")}>{LANG === "kk" ? "ҚАЗ → РУС" : "РУС → ҚАЗ"}</button>
-          <div className="chip-user" onClick={() => go("career")} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && go("career")}>
-            <Ring value={into / need} size={38} stroke={4} color="#fbbf24" big={<span style={{ fontSize: "0.9rem" }}>{level}</span>} small="" />
-            <div><strong>{g.curator.name}</strong><small>{rankOf(level).name}</small></div>
-          </div>
+          <button className="navlink" aria-label={tr("Язык")} title={tr("Язык")} onClick={() => setLang(LANG === "kk" ? "ru" : "kk")}>{LANG === "kk" ? "РУС" : "ҚАЗ"}</button>
+          <button className="navlink" aria-label={tr("Как играть")} title={tr("Как играть")} onClick={() => setHelp(true)}>?</button>
         </header>
 
         {view === "home" && <Home go={go} demo={demo} />}
