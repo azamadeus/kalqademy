@@ -2,7 +2,7 @@ import { EGO, EGO_ORDER } from "../data/ego";
 import { EVENTS } from "../data/events";
 import { INTERVENTIONS, interventionById, ivSource, type Intervention } from "../data/workbooks";
 import { PROBLEMS, familyById } from "../data/world";
-import { bestTone, dominantEgo, preferredWarmth, STAGES } from "./engine";
+import { bestTone, dominantEgo, preferredWarmth, STAGES, woundOf } from "./engine";
 import { TONES } from "./text";
 import type { CaseState, EgoKey, Letter, Plan, PlanResult, ProblemKey, Stage, Student } from "./types";
 
@@ -49,7 +49,8 @@ export function interventionFit(student: Student, iv: Intervention, stage?: Stag
   const top = topProblems(student, 3);
   const overlap = iv.problems.filter((p) => top.includes(p)).length;
   const stageOk = !stage || iv.stages.includes(stage) ? 1 : 0.6;
-  return (0.5 * egoMatch + 0.5 * Math.min(1, overlap)) * stageOk;
+  const woundBonus = iv.wounds?.includes(woundOf(student)) ? 0.25 : 0;
+  return Math.min(1, (0.5 * egoMatch + 0.5 * Math.min(1, overlap) + woundBonus) * stageOk);
 }
 
 /** The planned intervention (if any) that prepared the curator for this problem in the current stage. */

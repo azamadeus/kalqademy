@@ -1,4 +1,5 @@
 import type { EgoKey, ProblemKey, Stage, Tactic } from "../game/types";
+import type { WoundKey } from "./wounds";
 
 export interface WorkbookTopic {
   num: number;
@@ -227,6 +228,8 @@ export interface Intervention {
   problems: ProblemKey[];
   egos: EgoKey[];
   stages: Stage[];
+  /** Sensitive themes this technique suits (behavioural model). */
+  wounds?: WoundKey[];
 }
 
 /** Techniques drawn from the workbooks that a curator can put into a student's plan. */
@@ -293,9 +296,15 @@ export const INTERVENTIONS: Intervention[] = [
   { id: "ex-parents-thanks", wb: 0, title: "Письмо благодарности родителям", how: "Написать родителям письмо благодарности: снижает напряжение в отношениях и помогает говорить с семьёй спокойно.", tactic: "family", problems: ["family", "money"], egos: ["adapted_child", "caring_parent"], stages: ["trust"] },
   { id: "ex-forgive", wb: 0, title: "Письмо прощения себе", how: "Написать себе письмо с прощением за ошибки и неудачи, смягчить Критикующего Родителя.", tactic: "listen", problems: ["perfectionism", "anxiety"], egos: ["critical_parent"], stages: ["trust", "work"] },
   { id: "ex-psychologist", wb: 0, title: "Подключить психолога", how: "При тяжёлых состояниях рекомендовать работу со специалистом; куратор не заменяет психолога.", tactic: "family", problems: ["anxiety", "burnout"], egos: ["adapted_child", "critical_parent", "adult", "natural_child", "caring_parent"], stages: ["work", "exam"] },
+  { id: "w-quiet-place", wb: -1, title: "Право на место: тихое включение", how: "Заметить присутствие ученика, дать небольшую посильную роль без публичного внимания; не требовать немедленной открытости.", tactic: "listen", problems: ["social", "comparison", "motivation"], egos: ["adapted_child", "adult"], stages: ["meet", "trust"], wounds: ["rejection"] },
+  { id: "w-predictable", wb: -1, title: "Предсказуемый контакт", how: "Договориться о регулярных коротких встречах и заранее предупреждать об изменениях; постепенно давать самостоятельные решения.", tactic: "plan", problems: ["social", "motivation", "discipline"], egos: ["natural_child", "adapted_child"], stages: ["meet", "trust", "work"], wounds: ["abandonment"] },
+  { id: "w-private-feedback", wb: -1, title: "Обратная связь наедине", how: "Разбирать ошибки в личной переписке, без сравнения и публичной оценки; сначала сильные стороны, потом одно конкретное улучшение.", tactic: "listen", problems: ["perfectionism", "boundaries", "anxiety"], egos: ["adapted_child", "caring_parent"], stages: ["trust", "work"], wounds: ["humiliation"] },
+  { id: "w-keep-promises", wb: -1, title: "Держать обещания и быть прозрачным", how: "Обещать только выполнимое, объяснять причины изменений, сообщать о договорённостях заранее, не передавать сказанное по секрету.", tactic: "plan", problems: ["family", "motivation", "social"], egos: ["critical_parent", "adult"], stages: ["meet", "trust", "work"], wounds: ["betrayal"] },
+  { id: "w-fair-rules", wb: -1, title: "Справедливые правила и признание усилий", how: "Заранее обозначить критерии оценки, применять их одинаково, отмечать старание и разрешать «достаточно хорошо».", tactic: "plan", problems: ["perfectionism", "comparison", "discipline"], egos: ["critical_parent"], stages: ["trust", "work"], wounds: ["injustice"] },
 ];
 
 /** Human-readable source of an intervention. */
-export const ivSource = (iv: Intervention) => (iv.wb === 0 ? "приложение ALQA «Действия против ыңғайлылық»" : `воркбук №${iv.wb}`);
+export const ivSource = (iv: Intervention) =>
+  iv.wb === -1 ? "модель «чувствительных тем» (гипотеза)" : iv.wb === 0 ? "приложение ALQA «Действия против ыңғайлылық»" : `воркбук №${iv.wb}`;
 
 export const interventionById = (id: string) => INTERVENTIONS.find((i) => i.id === id);

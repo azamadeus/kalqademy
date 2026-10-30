@@ -1,3 +1,5 @@
+import type { WoundKey } from "../data/wounds";
+
 export type Letter = "E" | "I" | "S" | "N" | "T" | "F" | "J" | "P";
 export type Group = "analyst" | "diplomat" | "sentinel" | "explorer";
 export type EgoKey =
@@ -56,6 +58,8 @@ export interface Student {
   look: Look;
   /** Hidden profile: MBTI/ego are not shown until discovered. */
   blind: boolean;
+  /** Sensitive theme (behavioural model); derived from the profile when not set. */
+  wound?: WoundKey;
 }
 
 export interface Msg {
@@ -152,6 +156,7 @@ export interface Curator {
 export interface ReportInput {
   letters: Partial<Record<"EI" | "SN" | "TF" | "JP", Letter>>;
   ego: EgoKey | null;
+  wound?: WoundKey | null;
   tone: Tone | null;
   tactics: Tactic[];
   note: string;
@@ -164,6 +169,7 @@ export interface ReportResult {
   score: number;
   lettersCorrect: number;
   egoCorrect: boolean;
+  woundCorrect?: boolean;
   toneScore: number;
   tacticsHit: number;
   studentMessage: string;

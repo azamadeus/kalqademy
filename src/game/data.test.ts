@@ -7,7 +7,8 @@ import { COURSES, FAMILIES, GOALS } from "../data/world";
 import { EXERCISES } from "../data/exercises";
 import { INTERVENTIONS } from "../data/workbooks";
 import { act, addStudent, advance, newGame, setHypothesis, submitReport } from "./actions";
-import { bestTone, dominantEgo, stageOf } from "./engine";
+import { bestTone, dominantEgo, stageOf, woundOf } from "./engine";
+import { WOUND_ORDER, WOUNDS, ETHICS_RULES } from "../data/wounds";
 import { createStudent } from "./generate";
 import { fmt } from "./text";
 
@@ -54,6 +55,38 @@ describe("workbook content", () => {
       expect(i.egos.length, i.id).toBeGreaterThan(0);
       expect(i.stages.length, i.id).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("sensitive themes (behavioural model)", () => {
+  it("is deterministic, covers all five themes and never depends on appearance", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 300; i++) {
+      const s = createStudent({ seed: 9000 + i });
+      expect(woundOf(s)).toBe(woundOf({ ...s, look: { skin: 0, hair: 0, hairColor: 0, accessory: 0 } }));
+      seen.add(woundOf(s));
+    }
+    expect(seen.size).toBe(WOUND_ORDER.length);
+    for (const w of WOUND_ORDER) {
+      expect(WOUNDS[w].signs.join(" ")).not.toMatch(/телосложен|фигур|вес |лицо|внешност/i);
+      expect(WOUNDS[w].works.length).toBeGreaterThan(0);
+    }
+    expect(ETHICS_RULES.some((r) => /психолог/i.test(r.text))).toBe(true);
+  });
+
+  it("an explicit theme overrides the derived one and shapes the best approach", () => {
+    const base = createStudent({ seed: 5 });
+    const hum = { ...base, wound: "humiliation" as const };
+    expect(woundOf(hum)).toBe("humiliation");
+  });
+
+  it("the safety event rewards listening/involving adults and punishes dismissal", () => {
+    const e = EVENTS.find((x) => x.id === "alarm")!;
+    expect(e.serious).toBe(true);
+    const fits = Object.fromEntries(e.options.map((o) => [o.tactic, o.fit]));
+    expect(fits.listen).toBeGreaterThanOrEqual(2);
+    expect(fits.family).toBeGreaterThanOrEqual(2);
+    expect(fits.play).toBeLessThan(0);
   });
 });
 

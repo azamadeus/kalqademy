@@ -76,6 +76,7 @@ function rollEvent(student: Student, c: CaseState): CaseState {
   };
   next = push(next, "system", `📅 Неделя ${c.week} из ${TOTAL_WEEKS} · ${stage.icon} ${stage.name}`);
   next = push(next, "student", fmt(`${pre}${ev.text}${post}`, student));
+  if (ev.serious) next = push(next, "system", "⚠️ Серьёзный сигнал. В реальной ситуации немедленно сообщите школьному психологу и администрации; не обещайте хранить такое в тайне.");
   return next;
 }
 

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Avatar, Bar, studentColor } from "../components/ui";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES, TYPE_CODES } from "../data/mbti";
+import { WOUND_ORDER, WOUNDS, type WoundKey } from "../data/wounds";
 import { COURSES, FAMILIES, GOALS, courseById, familyById, goalById } from "../data/world";
 import { createStudent } from "../game/generate";
 import { useGame } from "../game/store";
@@ -24,10 +25,11 @@ export default function Studio({ go }: { go: Nav }) {
   const [goal, setGoal] = useState("med");
   const [mock, setMock] = useState(70);
   const [blind, setBlind] = useState(false);
+  const [wound, setWound] = useState<WoundKey | "">("");
 
   const st = useMemo(
-    () => createStudent({ seed, name: name.trim() || undefined, gender, mbti, dominant: dom, second: sec, familyId: fam, courseId: course, goalId: goal, mock, blind }),
-    [seed, name, gender, mbti, dom, sec, fam, course, goal, mock, blind],
+    () => createStudent({ seed, name: name.trim() || undefined, gender, mbti, dominant: dom, second: sec, familyId: fam, courseId: course, goalId: goal, mock, blind, wound: wound || undefined }),
+    [seed, name, gender, mbti, dom, sec, fam, course, goal, mock, blind, wound],
   );
 
   const setLetter = (i: number, l: string) => setMbti(mbti.split("").map((x, j) => (j === i ? l : x)).join(""));
@@ -106,6 +108,7 @@ export default function Studio({ go }: { go: Nav }) {
             <div className="field"><label>Семья</label><select value={fam} onChange={(e) => setFam(e.target.value)}>{FAMILIES.map((f) => <option key={f.id} value={f.id}>{f.icon} {f.label}</option>)}</select></div>
             <div className="field"><label>Цель</label><select value={goal} onChange={(e) => setGoal(e.target.value)}>{GOALS.map((g) => <option key={g.id} value={g.id}>{g.icon} {g.profession}</option>)}</select></div>
           </div>
+          <div className="field"><label>Чувствительная тема</label><select value={wound} onChange={(e) => setWound(e.target.value as WoundKey | "")}><option value="">Определить автоматически</option>{WOUND_ORDER.map((w) => <option key={w} value={w}>{WOUNDS[w].emoji} {WOUNDS[w].name}</option>)}</select></div>
           <div className="field"><label>Онлайн-курс</label><select value={course} onChange={(e) => setCourse(e.target.value)}>{COURSES.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.price}</option>)}</select></div>
           <div className="field"><label>Стартовый балл на пробнике: {mock} / 140</label><input type="range" min={40} max={110} value={mock} onChange={(e) => setMock(+e.target.value)} /></div>
           <label className="row small" style={{ cursor: "pointer" }}>

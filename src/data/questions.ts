@@ -1,5 +1,6 @@
 import type { Student } from "../game/types";
-import { dominantEgo, preferredWarmth } from "../game/engine";
+import { dominantEgo, preferredWarmth, woundOf } from "../game/engine";
+import { WOUNDS } from "./wounds";
 import { TYPES } from "./mbti";
 import { courseById, familyById, goalById } from "./world";
 
@@ -67,6 +68,7 @@ export const QUESTIONS: Question[] = [
         "Мне очень важно, чтобы со мной общались тепло. Когда холодно, замыкаюсь.",
       ][Math.round(preferredWarmth(s, 30)) as 0 | 1 | 2 | 3],
   },
+  { id: "hurt", text: "Что тебя задевает сильнее всего: когда игнорируют, бросают, высмеивают, обманывают или обращаются несправедливо?", about: "Чувствительная тема", needs: 1, answer: (s) => WOUNDS[woundOf(s)].voice },
   { id: "fear", text: "Чего ты боишься больше всего перед ЕНТ?", about: "Страхи", needs: 1, answer: (s) => TYPES[s.mbti].fearVoice },
 ];
 

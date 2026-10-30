@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { GROUPS, TYPES, TYPE_CODES } from "../data/mbti";
+import { ETHICS_RULES, WOUNDS, WOUND_ORDER } from "../data/wounds";
 import { EXERCISES, EX_GROUPS, type ExGroup } from "../data/exercises";
 import { INTERVENTIONS, WORKBOOKS } from "../data/workbooks";
 import { CLOSENESS, TACTICS, TONES } from "../game/text";
@@ -120,7 +121,7 @@ function TypeModal({ code, onClose }: { code: string; onClose: () => void }) {
   );
 }
 
-const TABS = ["Эго-состояния", "Типы MBTI", "Воркбуки", "Упражнения", "Тон общения", "Тактики"] as const;
+const TABS = ["Эго-состояния", "Типы MBTI", "Воркбуки", "Упражнения", "Чувствительные темы", "Этика", "Тон общения", "Тактики"] as const;
 
 interface Wb { topics: { num: number; title: string; pages: string[] }[] }
 
@@ -226,6 +227,38 @@ export default function Knowledge() {
       )}
 
       {tab === "Упражнения" && <ExercisesTab />}
+
+      {tab === "Чувствительные темы" && (
+        <div className="stack">
+          <div className="panel" style={{ borderColor: "#fbbf24" }}>
+            <h3>⚠️ Как это использовать</h3>
+            <p className="muted small" style={{ marginTop: 6 }}>Пять «чувствительных тем» (отвержение, покинутость, унижение, предательство, несправедливость) взяты из популярной книги Л. Бурбо «Пять травм, которые мешают быть самим собой». Автор сама отмечает, что научных доказательств нет. Здесь используется только поведенческая часть: что человек говорит, чего боится и как реагирует на обратную связь. Телосложение, внешность и медицинские утверждения книги <b>не используются и не рекомендуются</b>: определять особенности человека, тем более школьника, по телу ненаучно и ранит. Это гипотеза для настройки общения, не диагноз; ученику ярлык не называется.</p>
+          </div>
+          <div className="gridauto" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+            {WOUND_ORDER.map((w) => (
+              <div key={w} className="panel" style={{ borderColor: `${WOUNDS[w].color}88` }}>
+                <h3>{WOUNDS[w].emoji} {WOUNDS[w].name}</h3>
+                <p className="small muted">Стратегия защиты: {WOUNDS[w].strategy}. {WOUNDS[w].theme}</p>
+                <h4>Чего боится</h4><p className="small">{WOUNDS[w].fear}</p>
+                <h4>Признаки в поведении</h4><List items={WOUNDS[w].signs} />
+                <h4>Что помогает</h4><List items={WOUNDS[w].works} />
+                <h4>Чего избегать</h4><List items={WOUNDS[w].avoids} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "Этика" && (
+        <div className="stack">
+          <p className="muted small">Правила работы куратора со школьниками. Они действуют и в симуляторе, и в реальной практике.</p>
+          <div className="gridauto" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+            {ETHICS_RULES.map((r) => (
+              <div key={r.title} className="panel"><h3>{r.icon} {r.title}</h3><p className="small muted" style={{ marginTop: 6 }}>{r.text}</p></div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {tab === "Тон общения" && (
         <div className="stack">

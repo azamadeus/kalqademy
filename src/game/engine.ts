@@ -1,6 +1,7 @@
 import { EGO, EGO_ORDER } from "../data/ego";
 import { EVENTS, type EventOption, type GameEvent } from "../data/events";
 import { familyById } from "../data/world";
+import { WOUNDS, WOUND_ORDER, type WoundKey } from "../data/wounds";
 import { clamp, hashStr, mulberry32 } from "./rng";
 import type {
   CaseState,
@@ -61,9 +62,34 @@ export const letterAffinity = (mbti: string, tactic: Tactic): number =>
 export const dominantEgo = (student: Student): EgoKey =>
   EGO_ORDER.slice().sort((a, b) => student.ego[b] - student.ego[a])[0];
 
+const WOUND_BY_EGO: Record<EgoKey, Partial<Record<WoundKey, number>>> = {
+  caring_parent: { humiliation: 1, abandonment: 0.3, rejection: 0.2 },
+  critical_parent: { injustice: 1, betrayal: 0.6 },
+  adult: { betrayal: 0.8, rejection: 0.5, injustice: 0.3 },
+  adapted_child: { rejection: 0.8, humiliation: 0.6, abandonment: 0.6 },
+  natural_child: { abandonment: 0.9, betrayal: 0.2, rejection: 0.2 },
+};
+
+/** The student's sensitive theme: explicit if set, otherwise derived deterministically from ego, type and seed. */
+export function woundOf(student: Student): WoundKey {
+  if (student.wound) return student.wound;
+  const total = EGO_ORDER.reduce((a, k) => a + student.ego[k], 0) || 1;
+  const w: Record<WoundKey, number> = { rejection: 0, abandonment: 0, humiliation: 0, betrayal: 0, injustice: 0 };
+  for (const k of EGO_ORDER) for (const wk of WOUND_ORDER) w[wk] += (student.ego[k] / total) * (WOUND_BY_EGO[k][wk] ?? 0);
+  const [ei, , tf, jp] = student.mbti.split("");
+  if (ei === "I") w.rejection += 0.2;
+  if (ei === "E") w.abandonment += 0.2;
+  if (tf === "F") { w.humiliation += 0.15; w.abandonment += 0.1; }
+  if (tf === "T") { w.betrayal += 0.2; w.injustice += 0.1; }
+  if (jp === "J") w.injustice += 0.2;
+  const rng = mulberry32(student.seed * 13 + 5);
+  for (const wk of WOUND_ORDER) w[wk] += rng() * 0.35;
+  return WOUND_ORDER.slice().sort((a, b) => w[b] - w[a])[0];
+}
+
 /** How well a tactic suits the person (ignoring the situation). */
 export const styleScore = (student: Student, tactic: Tactic) =>
-  egoAffinity(student, tactic) * 3 + letterAffinity(student.mbti, tactic) * 2;
+  egoAffinity(student, tactic) * 3 + letterAffinity(student.mbti, tactic) * 2 + WOUNDS[woundOf(student)].tactic[tactic] * 1.5;
 
 export function preferredWarmth(student: Student, trust = 0): number {
   const total = EGO_ORDER.reduce((a, k) => a + student.ego[k], 0) || 1;

@@ -1,7 +1,8 @@
 import { EGO } from "../data/ego";
 import { FINAL_VOICE, TONE_TAIL } from "../data/voices";
 import { TYPES } from "../data/mbti";
-import { bestTone, dominantEgo, preferredWarmth, topTactics } from "./engine";
+import { bestTone, dominantEgo, preferredWarmth, topTactics, woundOf } from "./engine";
+import { WOUNDS } from "../data/wounds";
 import { TACTICS, TONES, fmt } from "./text";
 import type { CaseState, ReportInput, ReportResult, Student } from "./types";
 
@@ -19,7 +20,9 @@ export function evaluateReport(student: Student, c: CaseState, input: ReportInpu
   const toneScore = input.tone == null ? 0 : Math.max(0, 1 - Math.abs(input.tone - preferredWarmth(student, c.trust)) / 3);
   const top = topTactics(student, 2);
   const tacticsHit = input.tactics.filter((t) => top.includes(t)).length;
-  const score = Math.round((lettersCorrect / 4) * 35 + (egoCorrect ? 25 : 0) + toneScore * 20 + (tacticsHit / 2) * 20);
+  const wound = woundOf(student);
+  const woundCorrect = input.wound === wound;
+  const score = Math.round((lettersCorrect / 4) * 30 + (egoCorrect ? 20 : 0) + toneScore * 15 + (tacticsHit / 2) * 15 + (woundCorrect ? 20 : 0));
 
   const band = c.trust >= 65 ? "high" : c.trust >= 35 ? "mid" : "low";
   const toneOk = input.tone != null && Math.abs(input.tone - preferredWarmth(student, c.trust)) <= 0.8;
@@ -44,6 +47,13 @@ export function evaluateReport(student: Student, c: CaseState, input: ReportInpu
       ? `✅ Обе тактики выбраны верно.`
       : `Лучше всего работают: ${top.map((t) => `${TACTICS[t].icon} ${TACTICS[t].name}`).join(" и ")}.`,
   );
+  expert.push(
+    woundCorrect
+      ? `✅ Чувствительная тема определена верно: «${WOUNDS[wound].name}».`
+      : input.wound
+        ? `❌ Скорее всего, чувствительная тема «${WOUNDS[wound].name}» (вы указали «${WOUNDS[input.wound].name}»). Признаки: ${WOUNDS[wound].signs[0].toLowerCase()}.`
+        : `Чувствительная тема не указана. Вероятнее всего: «${WOUNDS[wound].name}». Что помогает: ${WOUNDS[wound].works[0].toLowerCase()}.`,
+  );
   expert.push(`Как мотивировать: ${info.motivate[0].toLowerCase()}.`);
   expert.push(`Что стоит говорить: ${info.say[0]}`);
   if (TYPES[student.mbti].works[0]) expert.push(`Для типа ${student.mbti}: ${TYPES[student.mbti].works[0].toLowerCase()}.`);
@@ -55,6 +65,7 @@ export function evaluateReport(student: Student, c: CaseState, input: ReportInpu
     score,
     lettersCorrect,
     egoCorrect,
+    woundCorrect,
     toneScore: Math.round(toneScore * 100),
     tacticsHit,
     studentMessage,

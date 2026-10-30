@@ -1,4 +1,5 @@
 import { EGO_ORDER } from "../data/ego";
+import type { WoundKey } from "../data/wounds";
 import { TYPE_CODES } from "../data/mbti";
 import { CITIES, COURSES, FAMILIES, GOALS, NAMES } from "../data/world";
 import { clamp, mulberry32, pick } from "./rng";
@@ -59,6 +60,7 @@ export interface StudentOptions {
   goalId?: string;
   mock?: number;
   blind?: boolean;
+  wound?: WoundKey;
   age?: number;
   city?: string;
 }
@@ -87,5 +89,6 @@ export function createStudent(opts: StudentOptions): Student {
       accessory: Math.floor(rng() * 4),
     },
     blind: opts.blind ?? true,
+    ...(opts.wound ? { wound: opts.wound } : {}),
   };
 }

@@ -6,7 +6,8 @@ import { QUESTIONS } from "../data/questions";
 import { TYPES } from "../data/mbti";
 import { courseById, familyById, goalById } from "../data/world";
 import { levelOf, questionsPerWeek } from "../game/career";
-import { GRANT_LINE, MAX_SCORE, TOTAL_WEEKS, bestTone, closenessLevel, dominantEgo, finalScoreOf, scoreChoice } from "../game/engine";
+import { GRANT_LINE, MAX_SCORE, TOTAL_WEEKS, bestTone, closenessLevel, dominantEgo, finalScoreOf, scoreChoice, woundOf } from "../game/engine";
+import { WOUNDS } from "../data/wounds";
 import { useGame } from "../game/store";
 import { TACTICS, TONES, fmt } from "../game/text";
 import type { EgoKey, Letter, Tone } from "../game/types";
@@ -138,6 +139,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
           <p className="small">💳 {course.name} · {course.price}<br /><span className="muted xs">{course.format}</span></p>
           <p className="small" style={{ marginTop: 6 }}>🎓 Старт на пробнике: {student.mock}</p>
           {(reveal || c.asked.includes("family")) && <p className="small" style={{ marginTop: 6 }}>{fam.icon} {fam.label}</p>}
+          {reveal && <p className="small" style={{ marginTop: 6 }}>{WOUNDS[woundOf(student)].emoji} Чувствительная тема: {WOUNDS[woundOf(student)].name}</p>}
           {level >= 4 && <p className="small" style={{ marginTop: 6 }}>🧭 Компас тона: ученику сейчас подходит «{TONES[prefTone].name}» {TONES[prefTone].icon}</p>}
           {level >= 3 && !c.revealed.includes("used") && !reveal && <button className="btn sm violet" style={{ marginTop: 8 }} onClick={() => intuition(student.id)}>🔮 Профинтуиция: раскрыть букву</button>}
         </div>
@@ -222,6 +224,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
             {[last.judge.situation, last.judge.style, last.judge.tone].map((ok, i) => (
               <div key={i} className="check"><span>{ok ? "✅" : "❌"}</span><span>{last.why[i]}</span></div>
             ))}
+            {eventById(last.eventId)?.serious && <div className="quote" style={{ borderColor: "#f87171", background: "rgba(248,113,113,0.1)" }}>⚠️ В реальной ситуации с такими словами: выслушать, не обещать тайну и сразу привлечь школьного психолога и ответственных взрослых.</div>}
             {last.planned && <div className="check"><span>📋</span><span>{last.why[3]}</span></div>}
             {reveal ? (
               <div className="quote" style={{ marginTop: 10 }}>

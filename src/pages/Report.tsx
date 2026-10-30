@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Avatar, Ring, studentColor } from "../components/ui";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES } from "../data/mbti";
+import { WOUND_ORDER, WOUNDS } from "../data/wounds";
 import { useGame } from "../game/store";
 import { TACTICS, TONES } from "../game/text";
 import type { EgoKey, Letter, ReportInput, ReportResult, Tactic, Tone } from "../game/types";
@@ -82,6 +83,15 @@ export default function Report({ sid, go }: { sid: string | null; go: Nav }) {
             </div>
           </div>
           <div>
+            <div className="lbl">Чувствительная тема (гипотеза, по поведению и словам)</div>
+            <div className="row wrap gap8" style={{ marginTop: 6 }}>
+              {WOUND_ORDER.map((w) => (
+                <button key={w} className={`choice ${input.wound === w ? "on" : ""}`} style={{ padding: "8px 12px" }} onClick={() => setInput({ ...input, wound: input.wound === w ? null : w })} title={WOUNDS[w].theme}>{WOUNDS[w].emoji} {WOUNDS[w].name}</button>
+              ))}
+            </div>
+            <p className="xs muted" style={{ marginTop: 6 }}>Это рабочая гипотеза о том, что задевает ученика, а не диагноз. Определяйте только по поведению и словам, не по внешности.</p>
+          </div>
+          <div>
             <div className="lbl">Подходящий тон общения</div>
             <div className="tones" style={{ marginTop: 6 }}>
               {TONES.map((t) => (
@@ -110,7 +120,7 @@ export default function Report({ sid, go }: { sid: string | null; go: Nav }) {
             <div className="panel stack" style={{ gap: 14 }}>
               <div className="row wrap" style={{ gap: 20 }}>
                 <Ring value={result.score / 100} size={120} color={result.score >= 70 ? "#34d399" : result.score >= 40 ? "#fbbf24" : "#f87171"} big={result.score} small="из 100" />
-                <div><h3>Оценка отчёта</h3><p className="muted small">Буквы: {result.lettersCorrect}/4 · эго: {result.egoCorrect ? "верно" : "неверно"} · тон: {result.toneScore}% · тактики: {result.tacticsHit}/2<br />Опыт: +{result.xp} · неделя {result.week}</p></div>
+                <div><h3>Оценка отчёта</h3><p className="muted small">Буквы: {result.lettersCorrect}/4 · эго: {result.egoCorrect ? "верно" : "неверно"} · тема: {result.woundCorrect ? "верно" : "нет"} · тон: {result.toneScore}% · тактики: {result.tacticsHit}/2<br />Опыт: +{result.xp} · неделя {result.week}</p></div>
               </div>
               <div>
                 <div className="lbl">Обратная связь от ученика</div>

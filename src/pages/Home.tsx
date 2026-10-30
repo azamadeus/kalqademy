@@ -59,6 +59,10 @@ export default function Home({ go, demo }: { go: Nav; demo: () => void }) {
         <div className="feature"><div className="ic">📝</div><h3>Отчёт и обратная связь</h3><p className="muted small" style={{ marginTop: 6 }}>Составь отчёт по ученику, и система ответит от его лица и разберёт твои ошибки по материалам ALQA.</p></div>
       </section>
 
+      <section className="panel small muted">
+        🛡️ <b>Этика.</b> Типы MBTI, эго-состояния и «чувствительные темы» это модели-гипотезы для тренировки общения, а не диагноз. Они не определяются по внешности, и ярлыки ученикам не называются. При тревожных сигналах куратор привлекает школьного психолога. <a href="#" onClick={(e) => { e.preventDefault(); go("knowledge"); }} style={{ color: "var(--accent)" }}>Правила куратора →</a>
+      </section>
+
       <section className="panel row wrap" style={{ justifyContent: "space-between" }}>
         <div>
           <div className="lbl">Твой путь</div>
