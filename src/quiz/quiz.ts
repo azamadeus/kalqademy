@@ -8,7 +8,8 @@ import { EGO_ORDER } from "../data/ego";
 import { mulberry32 } from "../game/rng";
 import { fmt } from "../game/text";
 import type { Student, Tactic } from "../game/types";
-import { tr } from "../i18n";
+import { LANG, tr } from "../i18n";
+import { EGO_ORIGINAL, TYPE_ORIGINAL } from "./original-kk";
 
 export const QUIZ_LENGTH = 10;
 /** Options within this many points of the best one count as equally right. */
@@ -95,15 +96,21 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
 }
 
 /** Why the right answer was right, written from what is known about the student. */
-export function hintFor(student: Student, q: Question, chosen: number): string[] {
+export function hintFor(student: Student, q: Question, chosen: number, n = 0): string[] {
   const dom = dominantEgo(student);
   const ego = EGO[dom];
   const type = TYPES[student.mbti];
-  const k = [...q.event.id].reduce((a, c) => a * 31 + c.charCodeAt(0), student.seed) >>> 0;
+  const k = n + (student.seed % 5);
   const pickOf = <T,>(a: T[]) => a[k % a.length];
   const lines: string[] = [];
   if (q.event.serious) {
     lines.push(tr("⚠️ В реальной ситуации с такими словами: выслушать, не обещать тайну и сразу привлечь школьного психолога и ответственных взрослых."));
+  } else if (LANG === "kk") {
+    const eo = EGO_ORIGINAL[dom];
+    const to = TYPE_ORIGINAL[student.mbti];
+    if (eo.motivate.length) lines.push(`${ego.name}: ${pickOf(eo.motivate)}`);
+    if (eo.say.length) lines.push(`💬 ${pickOf(eo.say)}`);
+    if (to.plus.length) lines.push(`${student.mbti}: ${pickOf(to.plus)}`);
   } else {
     lines.push(tr("Как мотивировать «{ego}»: {how}. Можно сказать: {say}", { ego: ego.name, how: pickOf(ego.motivate).toLowerCase(), say: pickOf(ego.say) }));
     lines.push(tr("Для типа {mbti} хорошо работает: {how}.", { mbti: student.mbti, how: pickOf(type.works).toLowerCase() }));

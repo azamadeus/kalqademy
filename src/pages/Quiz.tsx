@@ -37,7 +37,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
             <div className="msg student" style={{ maxWidth: "100%" }}>{questionText(q, student)}</div>
             <p className="small" style={{ margin: "12px 0 4px" }}>❌ {tr("Вы ответили:")} <span className="muted">{TACTICS[q.event.options[a].tactic].icon} {fmt(q.event.options[a].text, student)}</span></p>
             <p className="small">✅ {tr("Лучше:")} {TACTICS[q.event.options[q.right[0]].tactic].icon} {fmt(q.event.options[q.right[0]].text, student)}</p>
-            {hintFor(student, q, a).map((l, n) => <div key={n} className="quote">{l}</div>)}
+            {hintFor(student, q, a, k).map((l, n) => <div key={n} className="quote">{l}</div>)}
           </div>
         ))}
       </div>
