@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Avatar, Confetti, Ring, studentColor } from "../components/ui";
+import { phrasesOf } from "../data/phrases";
+import { woundOf } from "../game/engine";
 import { TACTICS, fmt } from "../game/text";
 import type { Student } from "../game/types";
 import { QUIZ_LENGTH, buildQuiz, hintFor, questionText } from "../quiz/quiz";
@@ -12,6 +14,10 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   const [answers, setAnswers] = useState<number[]>([]);
   const [chosen, setChosen] = useState<number | null>(null);
   const color = studentColor(student, true);
+  const phrases = phrasesOf(student.mbti);
+  /** The student's message, followed by a phrase typical for their type (not in a safety-critical situation). */
+  const speech = (q: (typeof quiz)[number], n: number) =>
+    q.event.serious || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(phrases[(n + student.seed) % phrases.length], student)}.`;
 
   const retry = () => { setAttempt((a) => a + 1); setI(0); setAnswers([]); setChosen(null); };
 
@@ -52,7 +58,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   return (
     <div className="flow">
       <header className="who">
-        <Avatar look={student.look} gender={student.gender} size={56} color={color} mood={0.7} stress={0.2} />
+        <Avatar look={student.look} gender={student.gender} size={56} color={color} mood={0.6} stress={0.3} theme={woundOf(student)} />
         <div className="grow">
           <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
             <b>{student.name} · {student.mbti}</b>
@@ -61,7 +67,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
           <div className="thin"><i style={{ width: `${((i + (answered ? 1 : 0)) / quiz.length) * 100}%` }} /></div>
         </div>
       </header>
-      <section className="chat"><div className="chat-log"><div className="msg system">{q.event.title}</div><div className="msg student">{questionText(q, student)}</div></div></section>
+      <section className="chat"><div className="chat-log"><div className="msg system">{q.event.title}</div><div className="msg student">{speech(q, i)}</div></div></section>
       <section className="card stack" style={{ gap: 12 }}>
         <div className="step-title">{tr("Ваш ответ")}</div>
         <div className="opts">

@@ -7,6 +7,7 @@ import { fmt } from "../game/text";
 import type { Student } from "../game/types";
 import { LANG, tr } from "../i18n";
 import type { EgoKey } from "../game/types";
+import { phrasesOf } from "../data/phrases";
 import { EGO_ORIGINAL, TYPE_ORIGINAL } from "./original-kk";
 import { TYPE_PDF } from "./pdf-kk";
 
@@ -89,7 +90,9 @@ export function legendOf(s: Student): Legend {
         tr("Привычные сценарии: {v}", { v: list(scenarios, 2) }),
         w.theme,
         f(w.voice),
+        tr("Как это проявляется: {v}", { v: list(w.signs, 3) }),
       ] },
+      { icon: "💬", head: tr("Любимые слова и фразы"), lines: phrasesOf(s.mbti).slice(0, 5).map((x) => `«${f(x)}»`) },
     ],
   };
 }

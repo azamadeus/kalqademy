@@ -37,3 +37,18 @@ describe("quiz", () => {
     expect(text).not.toMatch(/\{[^}]*\}/);
   });
 });
+
+import { phrasesOf } from "../data/phrases";
+import { fmt } from "../game/text";
+describe("phrases", () => {
+  it("every type has typical phrases and no leftover tokens", () => {
+    for (const mbti of TYPE_CODES) {
+      const ps = phrasesOf(mbti);
+      expect(ps.length).toBeGreaterThanOrEqual(5);
+      for (const gender of ["f", "m"] as const) {
+        const s = createStudent({ seed: 3, mbti, gender, blind: false });
+        for (const p of ps) expect(fmt(p, s)).not.toMatch(/[{}|]/);
+      }
+    }
+  });
+});

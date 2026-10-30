@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { GROUPS, groupOf } from "../data/mbti";
+import type { WoundKey } from "../data/wounds";
 import { CLOSENESS } from "../game/text";
 import { SKILLS } from "../game/career";
 import { STAGES, TOTAL_WEEKS, stageOf, closenessLevel } from "../game/engine";
@@ -10,15 +11,25 @@ import { tr } from "../i18n";
 const SKIN = ["#f5d0b5", "#e8b98f", "#d39b6e", "#b9784c", "#8d5a3a"];
 const HAIR = ["#2b2118", "#4a3222", "#7a4a2a", "#1a1a24", "#a0522d", "#c9a06a"];
 
+const THEME_FACE: Record<WoundKey, { gx: number; gy: number; inner: number; pupil: number; mouth: number; blush: boolean }> = {
+  rejection: { gx: -1.5, gy: 1.5, inner: -3, pupil: 3.2, mouth: -3, blush: false },
+  abandonment: { gx: 0, gy: -1, inner: -4, pupil: 3.9, mouth: -2, blush: false },
+  humiliation: { gx: 0, gy: 2.5, inner: -2, pupil: 3.2, mouth: -3, blush: true },
+  betrayal: { gx: 2, gy: 0, inner: 1, pupil: 2.7, mouth: -1, blush: false },
+  injustice: { gx: 0, gy: 0, inner: 3.5, pupil: 3.2, mouth: -2, blush: false },
+};
+
 export function Avatar({
-  look, mood = 0.6, stress = 0.3, size = 120, color, gender = "f", mark,
-}: { look: Look; mood?: number; stress?: number; size?: number; color?: string; gender?: "f" | "m"; mark?: string }) {
+  look, mood = 0.6, stress = 0.3, size = 120, color, gender = "f", mark, theme,
+}: { look: Look; mood?: number; stress?: number; size?: number; color?: string; gender?: "f" | "m"; mark?: string; theme?: WoundKey }) {
   const skin = SKIN[look.skin % SKIN.length];
   const hair = HAIR[look.hairColor % HAIR.length];
   const c = color ?? "#64748b";
   const m = clamp(mood, 0, 1);
-  const smile = 70 + (m - 0.5) * 20;
   const worry = clamp(stress, 0, 1) * 5;
+  // Expression only: the sensitive theme changes gaze, brows and mouth of the cartoon face, never the body.
+  const T = theme ? THEME_FACE[theme] : { gx: 0, gy: 0, inner: 0, pupil: 3.2, mouth: 0, blush: false };
+  const smile = 70 + (m - 0.5) * 20 + T.mouth;
   const id = `g${look.skin}${look.hair}${look.hairColor}${look.accessory}${c.slice(1)}`;
   const style = gender === "f" ? [1, 5, 2, 3, 1, 5][look.hair % 6] : [0, 4, 0, 4, 3, 0][look.hair % 6];
   return (
@@ -44,12 +55,12 @@ export function Avatar({
         {style === 3 && <>{[40, 50, 60, 70, 80].map((x, i) => <circle key={x} cx={x} cy={i % 2 ? 26 : 30} r="11" fill={hair} />)}<path d="M36 50 Q60 34 84 50 Q84 40 60 36 Q36 40 36 50Z" fill={hair} /></>}
         {style === 4 && <path d="M35 50 L38 26 L47 36 L53 20 L60 34 L68 20 L73 36 L82 26 L85 50 Q60 36 35 50Z" fill={hair} />}
         {style === 5 && <path d="M34 62 Q30 22 60 22 Q90 22 86 62 L86 70 Q76 68 76 48 Q60 38 44 48 Q44 68 34 70Z" fill={hair} />}
-        <path d={`M44 ${47 - worry * 0.4} L56 ${46 + worry * 0.6}`} stroke="#241c1c" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-        <path d={`M76 ${47 - worry * 0.4} L64 ${46 + worry * 0.6}`} stroke="#241c1c" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-        <circle cx="50" cy="56" r="3.2" fill="#1b1b2b" /><circle cx="70" cy="56" r="3.2" fill="#1b1b2b" />
-        <circle cx="51" cy="55" r="1" fill="#fff" /><circle cx="71" cy="55" r="1" fill="#fff" />
+        <path d={`M44 ${47 - worry * 0.4} L56 ${46 + worry * 0.6 + T.inner}`} stroke="#241c1c" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+        <path d={`M76 ${47 - worry * 0.4} L64 ${46 + worry * 0.6 + T.inner}`} stroke="#241c1c" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+        <circle cx={50 + T.gx} cy={56 + T.gy} r={T.pupil} fill="#1b1b2b" /><circle cx={70 + T.gx} cy={56 + T.gy} r={T.pupil} fill="#1b1b2b" />
+        <circle cx={51 + T.gx} cy={55 + T.gy} r="1" fill="#fff" /><circle cx={71 + T.gx} cy={55 + T.gy} r="1" fill="#fff" />
         <path d={`M50 70 Q60 ${smile} 70 70`} stroke="#8a3b3b" strokeWidth="2.6" strokeLinecap="round" fill="none" />
-        {m > 0.65 && <><circle cx="44" cy="66" r="4" fill="#ff7a9a" opacity="0.35" /><circle cx="76" cy="66" r="4" fill="#ff7a9a" opacity="0.35" /></>}
+        {(m > 0.65 || T.blush) && <><circle cx="44" cy="66" r="4" fill="#ff7a9a" opacity="0.35" /><circle cx="76" cy="66" r="4" fill="#ff7a9a" opacity="0.35" /></>}
         {look.accessory === 1 && <g stroke="#1f2937" strokeWidth="2" fill="rgba(255,255,255,0.12)"><circle cx="50" cy="56" r="8" /><circle cx="70" cy="56" r="8" /><path d="M58 56 H62" /></g>}
         {look.accessory === 2 && <g fill="#1f2937"><path d="M34 56 Q34 24 60 24 Q86 24 86 56" fill="none" stroke="#1f2937" strokeWidth="4" /><rect x="29" y="52" width="9" height="16" rx="4" /><rect x="82" y="52" width="9" height="16" rx="4" /></g>}
         {look.accessory === 3 && <circle cx="37" cy="64" r="2.6" fill="#fbbf24" />}

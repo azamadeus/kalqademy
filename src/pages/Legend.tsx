@@ -1,7 +1,7 @@
 import { Avatar, studentColor } from "../components/ui";
 import { EGO } from "../data/ego";
 import { TYPES } from "../data/mbti";
-import { dominantEgo } from "../game/engine";
+import { dominantEgo, woundOf } from "../game/engine";
 import type { Student } from "../game/types";
 import { legendOf } from "../quiz/legend";
 import { tr } from "../i18n";
@@ -13,7 +13,7 @@ export default function Legend({ student, start, back }: { student: Student; sta
     <div className="stack" style={{ gap: 18 }}>
       <div className="card center">
         <div style={{ display: "grid", placeItems: "center" }}>
-          <Avatar look={student.look} gender={student.gender} size={130} color={studentColor(student, true)} mood={0.7} stress={0.25} />
+          <Avatar look={student.look} gender={student.gender} size={130} color={studentColor(student, true)} mood={0.5} stress={0.35} theme={woundOf(student)} />
         </div>
         <h2 style={{ marginTop: 10 }}>{lg.title}</h2>
         <div className="row wrap gap8" style={{ justifyContent: "center", marginTop: 8 }}>
@@ -21,6 +21,7 @@ export default function Legend({ student, start, back }: { student: Student; sta
           <span className="pill">{ego.emoji} {ego.name}</span>
         </div>
       </div>
+      <p className="xs muted center" style={{ margin: "-6px auto 0", maxWidth: 480 }}>{tr("Выражение лица аватара отражает его чувствительную тему. Это игровая стилизация, а не способ «определять» травму по телу или внешности реальных людей.")}</p>
       <div className="card">
         <div className="step-title">📊 {tr("Эгограмма")}</div>
         {lg.egogram.map((r) => (
