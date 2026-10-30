@@ -71,5 +71,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "grant", icon: "🎓", name: "Грант в кармане", desc: "Ученик набрал 100+ баллов на ЕНТ", check: (g) => cases(g).some((c) => (c.finalScore ?? 0) >= 100) },
   { id: "top", icon: "🏆", name: "Высший балл", desc: "Ученик набрал 120+ баллов", check: (g) => cases(g).some((c) => (c.finalScore ?? 0) >= 120) },
   { id: "levelup", icon: "⭐", name: "Растущий наставник", desc: "Достичь 5 уровня куратора", check: (g) => levelOf(g.curator.xp).level >= 5 },
+  { id: "plan", icon: "🧭", name: "Архитектор развития", desc: "Составить план развития на 80+ баллов", check: (g) => cases(g).some((c) => (c.planResult?.score ?? 0) >= 80) },
   { id: "three", icon: "📋", name: "Опыт в деле", desc: "Завершить 3 сезона с учениками", check: (g) => g.curator.casesFinished >= 3 },
 ];

@@ -168,7 +168,10 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
             <option value="">Эго-состояние: пока не знаю</option>
             {EGO_ORDER.map((k) => <option key={k} value={k}>{EGO[k].emoji} {EGO[k].name}</option>)}
           </select>
-          <button className="btn sm ghost" style={{ marginTop: 10, width: "100%" }} onClick={() => go("report", student.id)}>📝 Составить отчёт</button>
+          <div className="row" style={{ marginTop: 10 }}>
+            <button className="btn sm ghost grow" onClick={() => go("plan", student.id)}>🧭 План{c.planResult ? ` · ${c.planResult.score}` : ""}</button>
+            <button className="btn sm ghost grow" onClick={() => go("report", student.id)}>📝 Отчёт</button>
+          </div>
         </div>
       </aside>
 
@@ -219,6 +222,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
             {[last.judge.situation, last.judge.style, last.judge.tone].map((ok, i) => (
               <div key={i} className="check"><span>{ok ? "✅" : "❌"}</span><span>{last.why[i]}</span></div>
             ))}
+            {last.planned && <div className="check"><span>📋</span><span>{last.why[3]}</span></div>}
             {reveal ? (
               <div className="quote" style={{ marginTop: 10 }}>
                 <b>Разбор ALQA:</b> {last.quality === "bad" || last.quality === "meh" ? `${EGO[dom].avoid[0]}. ` : ""}Как мотивировать «{EGO[dom].name}»: {EGO[dom].motivate[0].toLowerCase()}. Можно сказать: {EGO[dom].say[0]}

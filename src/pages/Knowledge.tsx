@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { GROUPS, TYPES, TYPE_CODES } from "../data/mbti";
+import { INTERVENTIONS, WORKBOOKS } from "../data/workbooks";
 import { CLOSENESS, TACTICS, TONES } from "../game/text";
 import type { EgoKey, Tactic } from "../game/types";
 
@@ -26,12 +27,12 @@ function List({ items }: { items: string[] }) {
   return <ul className="list">{items.map((x) => <li key={x}>{x}</li>)}</ul>;
 }
 
-function Original({ sections, pdf }: { sections?: Sec[]; pdf?: string[] | null }) {
+function Original({ sections, pdf, label = "Оригинал: методичка (қазақша, mbti_kz_1.docx)" }: { sections?: Sec[]; pdf?: string[] | null; label?: string }) {
   return (
     <div>
       {sections && sections.length > 0 && (
         <details>
-          <summary>📄 Оригинал: методичка (қазақша, mbti_kz_1.docx)</summary>
+          <summary>📄 {label}</summary>
           {sections.map((s, i) => (
             <div key={i} style={{ marginTop: 10 }}>
               {s.heading && <b className="small">{s.heading}</b>}
@@ -111,17 +112,20 @@ function TypeModal({ code, onClose }: { code: string; onClose: () => void }) {
   );
 }
 
-const TABS = ["Эго-состояния", "Типы MBTI", "Тон общения", "Тактики"] as const;
+const TABS = ["Эго-состояния", "Типы MBTI", "Воркбуки", "Тон общения", "Тактики"] as const;
+
+interface Wb { topics: { num: number; title: string; pages: string[] }[] }
 
 export default function Knowledge() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Эго-состояния");
   const [ego, setEgo] = useState<EgoKey | null>(null);
   const [type, setType] = useState<string | null>(null);
+  const wb = useJson<Wb>(tab === "Воркбуки" ? "workbooks.json" : null);
   return (
     <div className="stack">
       <div>
         <h2>База знаний</h2>
-        <p className="muted small">Сводка по материалам ALQA Academy: эго-состояния (трансактный анализ) и 16 типов MBTI. Внутри — оригиналы на казахском.</p>
+        <p className="muted small">Сводка по материалам ALQA Academy: эго-состояния, 16 типов MBTI и воркбуки по трансактному анализу. Внутри — оригиналы на казахском.</p>
       </div>
       <div className="row wrap gap8">
         {TABS.map((t) => <button key={t} className={`btn sm ${tab === t ? "" : "ghost"}`} onClick={() => setTab(t)}>{t}</button>)}
@@ -154,6 +158,30 @@ export default function Knowledge() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === "Воркбуки" && (
+        <div className="stack">
+          {WORKBOOKS.map((t) => {
+            const src = wb?.topics?.find((x) => x.num === t.num);
+            return (
+              <div key={t.num} className="panel">
+                <h3>Воркбук №{t.num}. {t.title}</h3>
+                <p className="muted" style={{ margin: "8px 0" }}>{t.summary}</p>
+                <div className="grid2">
+                  <div><h4>Ключевые идеи</h4><List items={t.concepts} /></div>
+                  <div><h4>Задания</h4><List items={t.tasks} /></div>
+                </div>
+                <h4>Приёмы для плана развития</h4>
+                <div className="row wrap gap8" style={{ margin: "6px 0 10px" }}>
+                  {INTERVENTIONS.filter((i) => i.wb === t.num).map((i) => <span key={i.id} className="pill" title={i.how}>{i.title}</span>)}
+                </div>
+                {src && <Original label="Оригинал воркбука (қазақша)" sections={[{ heading: "", lines: src.pages }]} />}
+              </div>
+            );
+          })}
+          <p className="xs muted">Остальные воркбуки будут добавлены по мере поступления материалов.</p>
         </div>
       )}
 

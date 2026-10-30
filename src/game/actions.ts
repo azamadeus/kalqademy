@@ -19,6 +19,7 @@ import {
 import { familyById } from "../data/world";
 import { clamp, hashStr, mulberry32, pick } from "./rng";
 import { evaluateReport } from "./report";
+import { evaluatePlan, planBonusFor, planCovers } from "./plan";
 import { TACTICS, fmt, toneWrap } from "./text";
 import type {
   CaseState,
@@ -26,6 +27,7 @@ import type {
   Hypothesis,
   Letter,
   Msg,
+  Plan,
   ReportInput,
   SkillKey,
   Student,
@@ -155,7 +157,9 @@ export function act(g: GameState, studentId: string, optionIndex: number, tone: 
   const ev = eventById(c.eventId);
   if (!ev) return g;
   const option = ev.options[optionIndex];
-  const s = scoreChoice(student, c.trust, option, tone);
+  const iv = planCovers(c.plan, stageOf(c.week), ev.problem);
+  const planBonus = iv && c.planResult ? planBonusFor(c.planResult.score) * (iv.tactic === option.tactic ? 1 : 0.4) : 0;
+  const s = scoreChoice(student, c.trust, option, tone, planBonus);
   const rng = mulberry32(student.seed * 17 + c.week * 53 + optionIndex);
   const ego = dominantEgo(student);
   let reply = fmt(pick(rng, REPLY[ego][s.quality]), student);
@@ -174,6 +178,7 @@ export function act(g: GameState, studentId: string, optionIndex: number, tone: 
   if (s.intrusive) reply += " " + INTRUSIVE;
   else if (s.tooCold) reply += " " + TOO_COLD;
   const why = whyLines(student, s, option.tactic, tone, student.blind);
+  if (iv && planBonus > 0) why.push(`📋 План сработал: заранее подготовлен приём «${iv.title}» (воркбук №${iv.wb}).`);
   c = push(c, "curator", toneWrap(tone, fmt(option.text, student)), tone);
   c = push(c, "student", reply);
   c = {
@@ -185,7 +190,7 @@ export function act(g: GameState, studentId: string, optionIndex: number, tone: 
     acted: true,
     doneEvents: [...c.doneEvents, ev.id],
     tones: [...c.tones, tone],
-    last: makeLast(ev.id, option.tactic, tone, s, why),
+    last: { ...makeLast(ev.id, option.tactic, tone, s, why), planned: iv && planBonus > 0 ? iv.title : null },
   };
   const skill = TACTICS[option.tactic].skill as SkillKey;
   return giveXp(putCase(g, c), XP_BY_QUALITY[s.quality], { [skill]: SKILL_BY_QUALITY[s.quality] });
@@ -239,6 +244,16 @@ export function submitReport(g: GameState, studentId: string, input: ReportInput
   const r = evaluateReport(student, c, input, g.seq);
   const next = putCase({ ...g, seq: g.seq + 1 }, { ...c, reports: [...c.reports, r] });
   return giveXp(next, r.xp, { diagnostics: Math.ceil(r.score / 20) });
+}
+
+export function submitPlan(g: GameState, studentId: string, plan: Plan): GameState {
+  const student = sget(g, studentId);
+  const c = g.cases[studentId];
+  const r = evaluatePlan(student, c, plan, g.seq, !student.blind || c.finished);
+  const withMsg = { ...r, studentMessage: fmt(r.studentMessage, student) };
+  let next = putCase({ ...g, seq: g.seq + 1 }, { ...c, plan, planResult: withMsg });
+  next = giveXp(next, r.xp, { structure: 2, diagnostics: 1 });
+  return next;
 }
 
 export function checkAchievements(g: GameState): { g: GameState; fresh: string[] } {

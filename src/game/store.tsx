@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as A from "./actions";
 import { ACHIEVEMENTS, levelOf } from "./career";
-import type { GameState, Hypothesis, ReportInput, Student, Tone } from "./types";
+import type { GameState, Hypothesis, Plan, ReportInput, Student, Tone } from "./types";
 
 const KEY = "kalqademy:v2";
 
@@ -38,6 +38,7 @@ interface Api {
   intuition: (sid: string) => void;
   hypothesis: (sid: string, h: Hypothesis) => void;
   report: (sid: string, r: ReportInput) => void;
+  plan: (sid: string, p: Plan) => void;
   setName: (name: string) => void;
   reset: () => void;
 }
@@ -98,6 +99,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       intuition: (sid) => update((x) => A.useIntuition(x, sid)),
       hypothesis: (sid, h) => update((x) => A.setHypothesis(x, sid, h)),
       report: (sid, r) => update((x) => A.submitReport(x, sid, r)),
+      plan: (sid, p) => update((x) => A.submitPlan(x, sid, p)),
       setName: (name) => update((x) => ({ ...x, curator: { ...x.curator, name } })),
       reset: () => {
         setToasts([]);

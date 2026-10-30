@@ -3,6 +3,7 @@ import { Ring } from "./components/ui";
 import Career from "./pages/Career";
 import CaseView from "./pages/Case";
 import Home from "./pages/Home";
+import PlanPage from "./pages/Plan";
 import Knowledge from "./pages/Knowledge";
 import Report from "./pages/Report";
 import Roster from "./pages/Roster";
@@ -11,7 +12,7 @@ import { levelOf, rankOf } from "./game/career";
 import { createStudent } from "./game/generate";
 import { GameProvider, useGame } from "./game/store";
 
-export type View = "home" | "roster" | "studio" | "case" | "report" | "career" | "knowledge";
+export type View = "home" | "roster" | "studio" | "case" | "plan" | "report" | "career" | "knowledge";
 export type Nav = (v: View, sid?: string) => void;
 
 const TABS: { id: View; label: string }[] = [
@@ -19,6 +20,7 @@ const TABS: { id: View; label: string }[] = [
   { id: "roster", label: "Ученики" },
   { id: "studio", label: "Студия" },
   { id: "case", label: "Диалог" },
+  { id: "plan", label: "План" },
   { id: "report", label: "Отчёт" },
   { id: "career", label: "Путь куратора" },
   { id: "knowledge", label: "База знаний" },
@@ -67,6 +69,7 @@ function Shell() {
         {view === "roster" && <Roster go={go} />}
         {view === "studio" && <Studio go={go} />}
         {view === "case" && <CaseView sid={sid} go={go} />}
+        {view === "plan" && <PlanPage sid={sid} go={go} />}
         {view === "report" && <Report sid={sid} go={go} />}
         {view === "career" && <Career />}
         {view === "knowledge" && <Knowledge />}

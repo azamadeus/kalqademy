@@ -89,6 +89,32 @@ export interface LastTurn {
   intrusive: boolean;
   tooCold: boolean;
   why: string[];
+  /** Title of the planned intervention that covered this situation, if any. */
+  planned?: string | null;
+}
+
+export interface PlanStep {
+  interventionIds: string[];
+  note: string;
+}
+
+export interface Plan {
+  goalScore: number;
+  focus: ProblemKey[];
+  tone: Tone | null;
+  steps: Record<Stage, PlanStep>;
+  metrics: string;
+  message: string;
+  family: string;
+}
+
+export interface PlanResult {
+  at: number;
+  score: number;
+  parts: { goal: number; focus: number; fit: number; complete: number; tone: number };
+  studentMessage: string;
+  expert: string[];
+  xp: number;
 }
 
 export interface CaseState {
@@ -112,6 +138,8 @@ export interface CaseState {
   finalScore: number | null;
   reports: ReportResult[];
   msgSeq: number;
+  plan?: Plan | null;
+  planResult?: PlanResult | null;
 }
 
 export interface Curator {

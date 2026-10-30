@@ -111,13 +111,14 @@ export function scoreChoice(
   trust: number,
   option: EventOption,
   tone: Tone,
+  planBonus = 0,
 ): Scored {
   const level = closenessLevel(trust);
   const pref = preferredWarmth(student, trust);
   const toneFit = 1 - Math.min(2, Math.abs(tone - pref));
   const style = styleScore(student, option.tactic);
   const fit = option.fit * 2;
-  const raw = fit + style + toneFit * 4 - 3;
+  const raw = fit + style + toneFit * 4 - 3 + planBonus;
   const sensitiveType = student.mbti[0] === "I" || student.mbti[2] === "T";
   const intrusive = tone - level >= 2 && (tone === 3 || sensitiveType);
   const tooCold = level >= 2 && tone === 0;
