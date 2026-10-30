@@ -4,6 +4,7 @@ import { createStudent } from "../game/generate";
 import { levelOf, rankOf } from "../game/career";
 import { useGame } from "../game/store";
 import type { Nav } from "../App";
+import { tr } from "../i18n";
 
 const HERO_SEEDS = [11, 25, 37, 49, 62];
 
@@ -27,15 +28,15 @@ export default function Home({ go, demo }: { go: Nav; demo: () => void }) {
     <div className="stack" style={{ gap: 28 }}>
       <section className="hero">
         <div>
-          <span className="pill">🎓 Тренажёр кураторов ЕНТ · по методике ALQA Academy</span>
-          <h1 style={{ marginTop: 14 }}>Стань куратором,<br /><span className="grad">которому доверяют</span></h1>
+          <span className="pill">{tr("🎓 Тренажёр кураторов ЕНТ · по методике ALQA Academy")}</span>
+          <h1 style={{ marginTop: 14 }}>{tr("Стань куратором,")}<br /><span className="grad">{tr("которому доверяют")}</span></h1>
           <p className="lead">
-            У каждого ученика свой тип MBTI, своё эго-состояние, своя семья и свой курс. Выбирай тон общения, находи подход, выстраивай отношения: от «отстранённых» до «очень тёплых». Прокачивай навыки и веди учеников к гранту.
+            {tr("У каждого ученика свой тип MBTI, своё эго-состояние, своя семья и свой курс. Выбирай тон общения, находи подход, выстраивай отношения: от «отстранённых» до «очень тёплых». Прокачивай навыки и веди учеников к гранту.")}
           </p>
           <div className="row wrap">
-            <button className="btn lg" onClick={demo}>▶ Начать с демо-ученика</button>
-            <button className="btn lg violet" onClick={() => go("studio")}>🧬 Создать ученика</button>
-            <button className="btn lg ghost" onClick={() => go("knowledge")}>📚 База знаний</button>
+            <button className="btn lg" onClick={demo}>{tr("▶ Начать с демо-ученика")}</button>
+            <button className="btn lg violet" onClick={() => go("studio")}>{tr("🧬 Создать ученика")}</button>
+            <button className="btn lg ghost" onClick={() => go("knowledge")}>{tr("📚 База знаний")}</button>
           </div>
         </div>
         <div className="hero-cluster" aria-hidden>
@@ -48,41 +49,41 @@ export default function Home({ go, demo }: { go: Nav; demo: () => void }) {
       </section>
 
       <section className="grid3">
-        <div className="panel stat"><b>{g.students.length}</b><span className="muted">учеников в работе</span></div>
-        <div className="panel stat"><b>{weeks}</b><span className="muted">недель прожито</span></div>
-        <div className="panel stat"><b>{avg ?? "—"}</b><span className="muted">средний балл ЕНТ</span></div>
+        <div className="panel stat"><b>{g.students.length}</b><span className="muted">{tr("учеников в работе")}</span></div>
+        <div className="panel stat"><b>{weeks}</b><span className="muted">{tr("недель прожито")}</span></div>
+        <div className="panel stat"><b>{avg ?? "—"}</b><span className="muted">{tr("средний балл ЕНТ")}</span></div>
       </section>
 
       <section className="steps4">
         {[
-          ["🧬", "Соберите ученика", "Тип, эго-состояние, семья, курс. Или случайный."],
-          ["💬", "Ведите диалог", "Тон общения и тактика на каждой неделе."],
-          ["🧭", "Составьте план", "Приёмы из воркбуков ALQA дают бонус."],
-          ["📝", "Сдайте отчёт", "Ученик ответит, система разберёт ошибки."],
+          ["🧬", tr("Соберите ученика"), tr("Тип, эго-состояние, семья, курс. Или случайный.")],
+          ["💬", tr("Ведите диалог"), tr("Тон общения и тактика на каждой неделе.")],
+          ["🧭", tr("Составьте план"), tr("Приёмы из воркбуков ALQA дают бонус.")],
+          ["📝", tr("Сдайте отчёт"), tr("Ученик ответит, система разберёт ошибки.")],
         ].map(([ic, t, d], i) => (
           <div key={t} className="step4"><span className="n">{i + 1}</span><div style={{ fontSize: "1.6rem" }}>{ic}</div><b>{t}</b><p className="muted small">{d}</p></div>
         ))}
       </section>
 
       <section className="grid3">
-        <div className="feature"><div className="ic">🧬</div><h3>Живые ученики</h3><p className="muted small" style={{ marginTop: 6 }}>16 типов MBTI × 5 эго-состояний, семья, онлайн-курс, цель. Профиль скрыт, его нужно распознать.</p></div>
-        <div className="feature"><div className="ic">💬</div><h3>Диалог и тон</h3><p className="muted small" style={{ marginTop: 6 }}>Отстранённо, нейтрально, хорошо, очень тепло. Слишком близко для чужих людей, слишком холодно для друзей: ученик это почувствует.</p></div>
-        <div className="feature"><div className="ic">📝</div><h3>Отчёт и обратная связь</h3><p className="muted small" style={{ marginTop: 6 }}>Составь отчёт по ученику, и система ответит от его лица и разберёт твои ошибки по материалам ALQA.</p></div>
+        <div className="feature"><div className="ic">🧬</div><h3>{tr("Живые ученики")}</h3><p className="muted small" style={{ marginTop: 6 }}>{tr("16 типов MBTI × 5 эго-состояний, семья, онлайн-курс, цель. Профиль скрыт, его нужно распознать.")}</p></div>
+        <div className="feature"><div className="ic">💬</div><h3>{tr("Диалог и тон")}</h3><p className="muted small" style={{ marginTop: 6 }}>{tr("Отстранённо, нейтрально, хорошо, очень тепло. Слишком близко для чужих людей, слишком холодно для друзей: ученик это почувствует.")}</p></div>
+        <div className="feature"><div className="ic">📝</div><h3>{tr("Отчёт и обратная связь")}</h3><p className="muted small" style={{ marginTop: 6 }}>{tr("Составь отчёт по ученику, и система ответит от его лица и разберёт твои ошибки по материалам ALQA.")}</p></div>
       </section>
 
       <section className="panel small muted">
-        🛡️ <b>Этика.</b> Типы MBTI, эго-состояния и «чувствительные темы» это модели-гипотезы для тренировки общения, а не диагноз. Они не определяются по внешности, и ярлыки ученикам не называются. При тревожных сигналах куратор привлекает школьного психолога. <a href="#" onClick={(e) => { e.preventDefault(); go("knowledge"); }} style={{ color: "var(--accent)" }}>Правила куратора →</a>
+        🛡️ <b>{tr("Этика.")}</b> {tr("Типы MBTI, эго-состояния и «чувствительные темы» это модели-гипотезы для тренировки общения, а не диагноз. Они не определяются по внешности, и ярлыки ученикам не называются. При тревожных сигналах куратор привлекает школьного психолога.")} <a href="#" onClick={(e) => { e.preventDefault(); go("knowledge"); }} style={{ color: "var(--accent)" }}>{tr("Правила куратора →")}</a>
       </section>
 
       <section className="panel row wrap" style={{ justifyContent: "space-between" }}>
         <div>
-          <div className="lbl">Твой путь</div>
-          <h3>Уровень {lv} · {rankOf(lv).name}</h3>
-          <p className="muted small">Опыт {g.curator.xp} · завершено сезонов: {g.curator.casesFinished}</p>
+          <div className="lbl">{tr("Твой путь")}</div>
+          <h3>{tr("Уровень")} {lv} · {rankOf(lv).name}</h3>
+          <p className="muted small">{tr("Опыт")} {g.curator.xp} {tr("· завершено сезонов:")} {g.curator.casesFinished}</p>
         </div>
         <div className="row wrap">
-          {g.students.length > 0 && <button className="btn" onClick={() => go("roster")}>Мои ученики →</button>}
-          <button className="btn ghost" onClick={() => go("career")}>Путь куратора</button>
+          {g.students.length > 0 && <button className="btn" onClick={() => go("roster")}>{tr("Мои ученики →")}</button>}
+          <button className="btn ghost" onClick={() => go("career")}>{tr("Путь куратора")}</button>
         </div>
       </section>
     </div>

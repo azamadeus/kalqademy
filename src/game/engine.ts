@@ -15,17 +15,18 @@ import type {
   Tactic,
   Tone,
 } from "./types";
+import { tr } from "../i18n";
 
 export const TOTAL_WEEKS = 12;
 export const GRANT_LINE = 100;
 export const MAX_SCORE = 140;
 
 export const STAGES: { id: Stage; name: string; from: number; icon: string; hint: string }[] = [
-  { id: "meet", name: "Знакомство", from: 1, icon: "👋", hint: "Первый контакт, адаптация к курсу" },
-  { id: "diagnose", name: "Диагностика", from: 3, icon: "🔍", hint: "Понять ученика: тип, эго-состояние, семья" },
-  { id: "trust", name: "Доверие", from: 5, icon: "🤝", hint: "Выстроить отношения, закрывать уязвимости" },
-  { id: "work", name: "Работа", from: 8, icon: "🚀", hint: "Рост баллов и устойчивость к стрессу" },
-  { id: "exam", name: "ЕНТ", from: 12, icon: "🏁", hint: "Финиш: тревога, режим, вера в себя" },
+  { id: "meet", name: tr("Знакомство"), from: 1, icon: "👋", hint: tr("Первый контакт, адаптация к курсу") },
+  { id: "diagnose", name: tr("Диагностика"), from: 3, icon: "🔍", hint: tr("Понять ученика: тип, эго-состояние, семья") },
+  { id: "trust", name: tr("Доверие"), from: 5, icon: "🤝", hint: tr("Выстроить отношения, закрывать уязвимости") },
+  { id: "work", name: tr("Работа"), from: 8, icon: "🚀", hint: tr("Рост баллов и устойчивость к стрессу") },
+  { id: "exam", name: tr("ЕНТ"), from: 12, icon: "🏁", hint: tr("Финиш: тревога, режим, вера в себя") },
 ];
 
 export const stageOf = (week: number): Stage => {
@@ -173,21 +174,21 @@ export function scoreChoice(
 
 export function whyLines(student: Student, s: Scored, tactic: Tactic, tone: Tone, blind: boolean): string[] {
   const lines: string[] = [];
-  lines.push(s.judge.situation ? "Решение подходит самой ситуации." : "Для самой ситуации решение было слабым.");
+  lines.push(s.judge.situation ? tr("Решение подходит самой ситуации.") : tr("Для самой ситуации решение было слабым."));
   if (blind) {
-    lines.push(s.judge.style ? "Подход попал в склад ученика." : "Подход плохо ложится на склад ученика.");
+    lines.push(s.judge.style ? tr("Подход попал в склад ученика.") : tr("Подход плохо ложится на склад ученика."));
   } else {
     const ego = EGO[dominantEgo(student)];
     lines.push(
       s.judge.style
-        ? `Подход совпал с тем, что нужно ученику (${ego.name}, ${student.mbti}).`
-        : `Подход не совпал с тем, что нужно ученику (${ego.name}, ${student.mbti}).`,
+        ? tr("Подход совпал с тем, что нужно ученику ({v}, {mbti}).", { v: ego.name, mbti: student.mbti })
+        : tr("Подход не совпал с тем, что нужно ученику ({v}, {mbti}).", { v: ego.name, mbti: student.mbti }),
     );
   }
-  if (s.intrusive) lines.push("Тон оказался слишком близким для текущих отношений: ученик почувствовал давление.");
-  else if (s.tooCold) lines.push("Тон оказался слишком холодным для сложившихся отношений.");
-  else if (s.judge.tone) lines.push("Тон общения попал в ожидания ученика.");
-  else lines.push(tone > preferredWarmth(student) ? "Тон был теплее, чем нужно этому ученику." : "Тон был холоднее, чем нужно этому ученику.");
+  if (s.intrusive) lines.push(tr("Тон оказался слишком близким для текущих отношений: ученик почувствовал давление."));
+  else if (s.tooCold) lines.push(tr("Тон оказался слишком холодным для сложившихся отношений."));
+  else if (s.judge.tone) lines.push(tr("Тон общения попал в ожидания ученика."));
+  else lines.push(tone > preferredWarmth(student) ? tr("Тон был теплее, чем нужно этому ученику.") : tr("Тон был холоднее, чем нужно этому ученику."));
   void tactic;
   return lines;
 }

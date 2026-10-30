@@ -34,6 +34,7 @@ import type {
   Student,
   Tone,
 } from "./types";
+import { tr } from "../i18n";
 
 export const VERSION = 2;
 
@@ -74,9 +75,9 @@ function rollEvent(student: Student, c: CaseState): CaseState {
     last: null,
     stress: clamp(c.stress + Math.round(ev.stress * 0.5)),
   };
-  next = push(next, "system", `📅 Неделя ${c.week} из ${TOTAL_WEEKS} · ${stage.icon} ${stage.name}`);
+  next = push(next, "system", tr("📅 Неделя {week} из {TOTAL_WEEKS} · {icon} {v}", { week: c.week, TOTAL_WEEKS, icon: stage.icon, v: stage.name }));
   next = push(next, "student", fmt(`${pre}${ev.text}${post}`, student));
-  if (ev.serious) next = push(next, "system", "⚠️ Серьёзный сигнал. В реальной ситуации немедленно сообщите школьному психологу и администрации; не обещайте хранить такое в тайне.");
+  if (ev.serious) next = push(next, "system", tr("⚠️ Серьёзный сигнал. В реальной ситуации немедленно сообщите школьному психологу и администрации; не обещайте хранить такое в тайне."));
   return next;
 }
 
@@ -107,7 +108,7 @@ export function startCase(student: Student, level: number): CaseState {
   const intro = push(
     base,
     "system",
-    fmt(`🎓 ${student.name} записан{а} на курс и закреплён{а} за вами. Ваша задача: за ${TOTAL_WEEKS} недель подготовить ученика к ЕНТ.`, student),
+    fmt(tr("🎓 {v} записан{а} на курс и закреплён{а} за вами. Ваша задача: за {TOTAL_WEEKS} недель подготовить ученика к ЕНТ.", { v: student.name, TOTAL_WEEKS }), student),
   );
   return rollEvent(student, intro);
 }
@@ -180,7 +181,7 @@ export function act(g: GameState, studentId: string, optionIndex: number, tone: 
   if (s.intrusive) reply += " " + INTRUSIVE;
   else if (s.tooCold) reply += " " + TOO_COLD;
   const why = whyLines(student, s, option.tactic, tone, student.blind);
-  if (iv && planBonus > 0) why.push(`📋 План сработал: заранее подготовлен приём «${iv.title}» (${ivSource(iv)}).`);
+  if (iv && planBonus > 0) why.push(tr("📋 План сработал: заранее подготовлен приём «{title}» ({iv}).", { title: iv.title, iv: ivSource(iv) }));
   c = push(c, "curator", toneWrap(tone, fmt(option.text, student)), tone);
   c = push(c, "student", reply);
   c = {
@@ -209,7 +210,7 @@ export function advance(g: GameState, studentId: string): GameState {
   const level = levelOf(g.curator.xp).level;
   if (c.week >= TOTAL_WEEKS) {
     const score = finalScoreOf(student, c);
-    c = push({ ...c, finished: true, finalScore: score, eventId: null }, "system", `🏁 ЕНТ сдан! Итог: ${score} баллов из 140.`);
+    c = push({ ...c, finished: true, finalScore: score, eventId: null }, "system", tr("🏁 ЕНТ сдан! Итог: {score} баллов из 140.", { score }));
     const students = g.students.map((s) => (s.id === studentId ? { ...s, blind: false } : s));
     const bonus = 20 + Math.round(score / 4);
     const g2 = giveXp({ ...putCase(g, c), students, curator: { ...g.curator, casesFinished: g.curator.casesFinished + 1 } }, bonus);

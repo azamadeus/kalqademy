@@ -13,12 +13,13 @@ import { useGame } from "../game/store";
 import { TACTICS, TONES, fmt } from "../game/text";
 import type { EgoKey, Letter, Tone } from "../game/types";
 import type { Nav } from "../App";
+import { tr } from "../i18n";
 
 const QUALITY = {
-  great: { t: "Отличный ход!", i: "🌟" },
-  good: { t: "Хороший ход", i: "👍" },
-  meh: { t: "Так себе", i: "😐" },
-  bad: { t: "Мимо", i: "😬" },
+  great: { t: tr("Отличный ход!"), i: "🌟" },
+  good: { t: tr("Хороший ход"), i: "👍" },
+  meh: { t: tr("Так себе"), i: "😐" },
+  bad: { t: tr("Мимо"), i: "😬" },
 } as const;
 
 const AXES: ["EI" | "SN" | "TF" | "JP", [Letter, Letter]][] = [["EI", ["E", "I"]], ["SN", ["S", "N"]], ["TF", ["T", "F"]], ["JP", ["J", "P"]]];
@@ -90,11 +91,11 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
     return (
       <div className="panel empty">
         <div className="big">💬</div>
-        <h2>Выберите ученика</h2>
-        <p className="muted" style={{ margin: "8px 0 18px" }}>Откройте кейс из списка или создайте нового ученика.</p>
+        <h2>{tr("Выберите ученика")}</h2>
+        <p className="muted" style={{ margin: "8px 0 18px" }}>{tr("Откройте кейс из списка или создайте нового ученика.")}</p>
         <div className="row" style={{ justifyContent: "center" }}>
-          <button className="btn" onClick={() => go("studio")}>Создать ученика</button>
-          <button className="btn ghost" onClick={() => go("roster")}>Мои ученики</button>
+          <button className="btn" onClick={() => go("studio")}>{tr("Создать ученика")}</button>
+          <button className="btn ghost" onClick={() => go("roster")}>{tr("Мои ученики")}</button>
         </div>
       </div>
     );
@@ -133,25 +134,25 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
           <h2>{student.name}, {student.age}</h2>
           <p className="muted small">{student.city} · {goal.icon} {goal.profession}</p>
           <div style={{ textAlign: "left", marginTop: 14 }}>
-            <Bar label="Доверие" value={c.trust} color="#34d399" />
-            <Bar label="Мотивация" value={c.motivation} color="#60a5fa" />
-            <Bar label="Стресс" value={c.stress} color="#f87171" invert />
+            <Bar label={tr("Доверие")} value={c.trust} color="#34d399" />
+            <Bar label={tr("Мотивация")} value={c.motivation} color="#60a5fa" />
+            <Bar label={tr("Стресс")} value={c.stress} color="#f87171" invert />
           </div>
           <div className="row" style={{ justifyContent: "center", marginTop: 8 }}>
-            <Ring value={forecast / MAX_SCORE} size={96} stroke={9} color={forecast >= GRANT_LINE ? "#34d399" : "#fbbf24"} big={forecast} small="прогноз ЕНТ" />
-            <p className="xs muted" style={{ textAlign: "left", maxWidth: 130 }}>Грант (условно) от {GRANT_LINE}. Старт: {student.mock}, добавлено знаний: {c.knowledge > 0 ? "+" : ""}{c.knowledge}.</p>
+            <Ring value={forecast / MAX_SCORE} size={96} stroke={9} color={forecast >= GRANT_LINE ? "#34d399" : "#fbbf24"} big={forecast} small={tr("прогноз ЕНТ")} />
+            <p className="xs muted" style={{ textAlign: "left", maxWidth: 130 }}>{tr("Грант (условно) от {line}. Старт: {mock}, добавлено знаний: {gain}.", { line: GRANT_LINE, mock: student.mock, gain: `${c.knowledge > 0 ? "+" : ""}${c.knowledge}` })}</p>
           </div>
         </div>
 
         <div className="panel">
-          <div className="step-title">Отношения</div>
+          <div className="step-title">{tr("Отношения")}</div>
           <Ladder trust={c.trust} />
           <div style={{ height: 12 }} />
           <StageTrack week={c.week} />
         </div>
 
         <div className="panel">
-          <div className="step-title">Досье</div>
+          <div className="step-title">{tr("Досье")}</div>
           <div className="row wrap gap8" style={{ marginBottom: 8 }}>
             {AXES.map(([k], i) => <span key={k} className="badge" style={{ background: knownLetter(i) === "?" ? "rgba(255,255,255,0.08)" : `${color}55`, fontSize: "1rem", padding: "4px 12px" }}>{knownLetter(i)}</span>)}
             {reveal && <span className="pill">{TYPES[student.mbti].nick}</span>}
@@ -160,18 +161,18 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
             <div style={{ marginBottom: 8 }}>
               {EGO_ORDER.map((k) => <Bar key={k} label={`${EGO[k].emoji} ${EGO[k].name}`} value={student.ego[k]} color={EGO[k].color} />)}
             </div>
-          ) : <p className="xs muted" style={{ marginBottom: 8 }}>Эго-состояние неизвестно. Спрашивайте и наблюдайте.</p>}
+          ) : <p className="xs muted" style={{ marginBottom: 8 }}>{tr("Эго-состояние неизвестно. Спрашивайте и наблюдайте.")}</p>}
           <p className="small">💳 {course.name} · {course.price}<br /><span className="muted xs">{course.format}</span></p>
-          <p className="small" style={{ marginTop: 6 }}>🎓 Старт на пробнике: {student.mock}</p>
+          <p className="small" style={{ marginTop: 6 }}>{tr("🎓 Старт на пробнике: {mock}", { mock: student.mock })}</p>
           {(reveal || c.asked.includes("family")) && <p className="small" style={{ marginTop: 6 }}>{fam.icon} {fam.label}</p>}
-          {reveal && <p className="small" style={{ marginTop: 6 }}>{WOUNDS[woundOf(student)].emoji} Чувствительная тема: {WOUNDS[woundOf(student)].name}</p>}
-          {level >= 4 && <p className="small" style={{ marginTop: 6 }}>🧭 Компас тона: ученику сейчас подходит «{TONES[prefTone].name}» {TONES[prefTone].icon}</p>}
-          {level >= 3 && !c.revealed.includes("used") && !reveal && <button className="btn sm violet" style={{ marginTop: 8 }} onClick={() => intuition(student.id)}>🔮 Профинтуиция: раскрыть букву</button>}
+          {reveal && <p className="small" style={{ marginTop: 6 }}>{WOUNDS[woundOf(student)].emoji} {tr("Чувствительная тема: {name}", { name: WOUNDS[woundOf(student)].name })}</p>}
+          {level >= 4 && <p className="small" style={{ marginTop: 6 }}>{tr("🧭 Компас тона: ученику сейчас подходит «{name}» {icon}", { name: TONES[prefTone].name, icon: TONES[prefTone].icon })}</p>}
+          {level >= 3 && !c.revealed.includes("used") && !reveal && <button className="btn sm violet" style={{ marginTop: 8 }} onClick={() => intuition(student.id)}>{tr("🔮 Профинтуиция: раскрыть букву")}</button>}
         </div>
 
         {notes.length > 0 && (
           <div className="panel">
-            <div className="step-title">Заметки куратора</div>
+            <div className="step-title">{tr("Заметки куратора")}</div>
             {notes.map((q) => (
               <details key={q.id}>
                 <summary className="small">{q.about}</summary>
@@ -182,7 +183,7 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
         )}
 
         <div className="panel">
-          <div className="step-title">Моя гипотеза</div>
+          <div className="step-title">{tr("Моя гипотеза")}</div>
           <div className="row wrap gap8">
             {AXES.map(([k, [a, b]]) => (
               <div key={k} className="seg">
@@ -192,12 +193,12 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
             ))}
           </div>
           <select style={{ marginTop: 10 }} value={hyp.ego ?? ""} onChange={(e) => setHEgo(e.target.value as EgoKey | "")}>
-            <option value="">Эго-состояние: пока не знаю</option>
+            <option value="">{tr("Эго-состояние: пока не знаю")}</option>
             {EGO_ORDER.map((k) => <option key={k} value={k}>{EGO[k].emoji} {EGO[k].name}</option>)}
           </select>
           <div className="row" style={{ marginTop: 10 }}>
-            <button className="btn sm ghost grow" onClick={() => go("plan", student.id)}>🧭 План{c.planResult ? ` · ${c.planResult.score}` : ""}</button>
-            <button className="btn sm ghost grow" onClick={() => go("report", student.id)}>📝 Отчёт</button>
+            <button className="btn sm ghost grow" onClick={() => go("plan", student.id)}>{tr("🧭 План")}{c.planResult ? ` · ${c.planResult.score}` : ""}</button>
+            <button className="btn sm ghost grow" onClick={() => go("report", student.id)}>{tr("📝 Отчёт")}</button>
           </div>
         </div>
       </aside>
@@ -206,9 +207,9 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
         <section className="panel chat">
           <div className="chat-head">
             <Avatar look={student.look} gender={student.gender} size={40} color={color} mood={mood} stress={c.stress / 100} />
-            <div className="grow"><b>{student.name}</b><div className="xs muted">{typing ? "печатает…" : "в сети"}</div></div>
-            <span className="pill">нед. {c.week}/{TOTAL_WEEKS}</span>
-            <select aria-label="Сменить ученика" style={{ width: "auto" }} value={student.id} onChange={(e) => go("case", e.target.value)}>
+            <div className="grow"><b>{student.name}</b><div className="xs muted">{typing ? tr("печатает…") : tr("в сети")}</div></div>
+            <span className="pill">{tr("нед.")} {c.week}/{TOTAL_WEEKS}</span>
+            <select aria-label={tr("Сменить ученика")} style={{ width: "auto" }} value={student.id} onChange={(e) => go("case", e.target.value)}>
               {g.students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
@@ -222,15 +223,15 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
         {c.finished ? (
           <section className="panel center" style={{ padding: 30 }}>
             <div className="row wrap" style={{ justifyContent: "center", gap: 30 }}>
-              <Ring value={(c.finalScore ?? 0) / MAX_SCORE} size={170} stroke={14} color={(c.finalScore ?? 0) >= GRANT_LINE ? "#34d399" : "#fbbf24"} big={c.finalScore} small="баллов ЕНТ" />
+              <Ring value={(c.finalScore ?? 0) / MAX_SCORE} size={170} stroke={14} color={(c.finalScore ?? 0) >= GRANT_LINE ? "#34d399" : "#fbbf24"} big={c.finalScore} small={tr("баллов ЕНТ")} />
               <div style={{ textAlign: "left", maxWidth: 420 }}>
-                <h2>{(c.finalScore ?? 0) >= GRANT_LINE ? "🎓 Грант совсем рядом!" : "Сезон завершён"}</h2>
+                <h2>{(c.finalScore ?? 0) >= GRANT_LINE ? tr("🎓 Грант совсем рядом!") : tr("Сезон завершён")}</h2>
                 <p className="muted" style={{ margin: "6px 0 12px" }}>
-                  {student.name} стартовал{student.gender === "f" ? "а" : ""} с {student.mock} баллов и закончил{student.gender === "f" ? "а" : ""} с {c.finalScore}. Тип: {student.mbti} «{TYPES[student.mbti].nick}», доминирует {EGO[dom].name}. Отношения: {closenessLevel(c.trust) === 3 ? "очень тёплые 💚" : closenessLevel(c.trust) === 2 ? "хорошие 😊" : closenessLevel(c.trust) === 1 ? "нейтральные 🙂" : "отстранённые ❄️"}.
+                  {fmt(tr("{name} стартовал{а} с {mock} баллов и закончил{а} с {score}. Тип: {mbti} «{nick}», доминирует {ego}. Отношения: {rel}.", { name: student.name, mock: student.mock, score: c.finalScore ?? 0, mbti: student.mbti, nick: TYPES[student.mbti].nick, ego: EGO[dom].name, rel: closenessLevel(c.trust) === 3 ? tr("очень тёплые 💚") : closenessLevel(c.trust) === 2 ? tr("хорошие 😊") : closenessLevel(c.trust) === 1 ? tr("нейтральные 🙂") : tr("отстранённые ❄️") }), student)}
                 </p>
                 <div className="row wrap">
-                  <button className="btn" onClick={() => go("report", student.id)}>📝 Итоговый отчёт</button>
-                  <button className="btn ghost" onClick={() => go("studio")}>Новый ученик</button>
+                  <button className="btn" onClick={() => go("report", student.id)}>{tr("📝 Итоговый отчёт")}</button>
+                  <button className="btn ghost" onClick={() => go("studio")}>{tr("Новый ученик")}</button>
                 </div>
               </div>
             </div>
@@ -238,17 +239,17 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
               const r = seasonReview(c);
               return (
                 <div style={{ textAlign: "left", marginTop: 22 }}>
-                  <div className="step-title">Разбор сезона · {r.total} ходов</div>
+                  <div className="step-title">{tr("Разбор сезона · {n} ходов", { n: r.total })}</div>
                   <div className="review">
-                    <div className="cell"><b style={{ color: "#34d399" }}>{r.counts.great}</b><span className="xs muted">отлично</span></div>
-                    <div className="cell"><b style={{ color: "#60a5fa" }}>{r.counts.good}</b><span className="xs muted">хорошо</span></div>
-                    <div className="cell"><b style={{ color: "#fbbf24" }}>{r.counts.meh}</b><span className="xs muted">так себе</span></div>
-                    <div className="cell"><b style={{ color: "#f87171" }}>{r.counts.bad}</b><span className="xs muted">мимо</span></div>
+                    <div className="cell"><b style={{ color: "#34d399" }}>{r.counts.great}</b><span className="xs muted">{tr("отлично")}</span></div>
+                    <div className="cell"><b style={{ color: "#60a5fa" }}>{r.counts.good}</b><span className="xs muted">{tr("хорошо")}</span></div>
+                    <div className="cell"><b style={{ color: "#fbbf24" }}>{r.counts.meh}</b><span className="xs muted">{tr("так себе")}</span></div>
+                    <div className="cell"><b style={{ color: "#f87171" }}>{r.counts.bad}</b><span className="xs muted">{tr("мимо")}</span></div>
                   </div>
-                  <p className="xs muted">Точный тон: {Math.round(r.toneRate * 100)}% ходов · план сработал: {r.planned}</p>
+                  <p className="xs muted">{tr("Точный тон: {rate}% ходов · план сработал: {planned}", { rate: Math.round(r.toneRate * 100), planned: r.planned })}</p>
                   <div className="grid2" style={{ marginTop: 8 }}>
-                    <div><h4>Что получилось</h4>{r.strengths.map((t) => <div key={t} className="quote">✅ {t}</div>)}</div>
-                    <div><h4>Что улучшить</h4>{r.improve.length ? r.improve.map((t) => <div key={t} className="quote" style={{ borderColor: "#fbbf24", background: "rgba(251,191,36,0.07)" }}>⚠️ {t}</div>) : <div className="quote">Явных слабых мест не видно. Попробуйте более сложного ученика.</div>}</div>
+                    <div><h4>{tr("Что получилось")}</h4>{r.strengths.map((t) => <div key={t} className="quote">✅ {t}</div>)}</div>
+                    <div><h4>{tr("Что улучшить")}</h4>{r.improve.length ? r.improve.map((t) => <div key={t} className="quote" style={{ borderColor: "#fbbf24", background: "rgba(251,191,36,0.07)" }}>⚠️ {t}</div>) : <div className="quote">{tr("Явных слабых мест не видно. Попробуйте более сложного ученика.")}</div>}</div>
                   </div>
                 </div>
               );
@@ -261,27 +262,27 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
               <span className="pill">{TACTICS[last.tactic].icon} {TACTICS[last.tactic].name} · {TONES[last.tone].icon} {TONES[last.tone].name}</span>
             </div>
             <div className="row wrap gap8" style={{ margin: "12px 0" }}>
-              <Delta label="Доверие" v={last.dTrust} />
-              <Delta label="Мотивация" v={last.dMotivation} />
-              <Delta label="Стресс" v={last.dStress} goodWhenDown />
-              <Delta label="Знания" v={last.dKnowledge} />
+              <Delta label={tr("Доверие")} v={last.dTrust} />
+              <Delta label={tr("Мотивация")} v={last.dMotivation} />
+              <Delta label={tr("Стресс")} v={last.dStress} goodWhenDown />
+              <Delta label={tr("Знания")} v={last.dKnowledge} />
             </div>
             {[last.judge.situation, last.judge.style, last.judge.tone].map((ok, i) => (
               <div key={i} className="check"><span>{ok ? "✅" : "❌"}</span><span>{last.why[i]}</span></div>
             ))}
-            {eventById(last.eventId)?.serious && <div className="quote" style={{ borderColor: "#f87171", background: "rgba(248,113,113,0.1)" }}>⚠️ В реальной ситуации с такими словами: выслушать, не обещать тайну и сразу привлечь школьного психолога и ответственных взрослых.</div>}
+            {eventById(last.eventId)?.serious && <div className="quote" style={{ borderColor: "#f87171", background: "rgba(248,113,113,0.1)" }}>{tr("⚠️ В реальной ситуации с такими словами: выслушать, не обещать тайну и сразу привлечь школьного психолога и ответственных взрослых.")}</div>}
             {last.planned && <div className="check"><span>📋</span><span>{last.why[3]}</span></div>}
             {reveal ? (
               <div className="quote" style={{ marginTop: 10 }}>
-                <b>Разбор ALQA:</b> {last.quality === "bad" || last.quality === "meh" ? `${EGO[dom].avoid[0]}. ` : ""}Как мотивировать «{EGO[dom].name}»: {EGO[dom].motivate[0].toLowerCase()}. Можно сказать: {EGO[dom].say[0]}
+                <b>{tr("Разбор ALQA:")}</b> {last.quality === "bad" || last.quality === "meh" ? `${EGO[dom].avoid[0]}. ` : ""}{tr("Как мотивировать «{ego}»: {how}. Можно сказать: {say}", { ego: EGO[dom].name, how: EGO[dom].motivate[0].toLowerCase(), say: EGO[dom].say[0] })}
               </div>
-            ) : <p className="xs muted" style={{ marginTop: 10 }}>🔒 Подробный разбор откроется, когда профиль ученика станет известен.</p>}
-            <button className="btn lg" style={{ marginTop: 14 }} onClick={() => advance(student.id)}>{c.week >= TOTAL_WEEKS ? "Сдать ЕНТ 🏁" : "Следующая неделя →"}</button>
+            ) : <p className="xs muted" style={{ marginTop: 10 }}>{tr("🔒 Подробный разбор откроется, когда профиль ученика станет известен.")}</p>}
+            <button className="btn lg" style={{ marginTop: 14 }} onClick={() => advance(student.id)}>{c.week >= TOTAL_WEEKS ? tr("Сдать ЕНТ 🏁") : tr("Следующая неделя →")}</button>
           </section>
         ) : (
           <section className="panel stack" style={{ gap: 18 }}>
             <div>
-              <div className="step-title">1. Тон общения <span className="xs muted" style={{ textTransform: "none", letterSpacing: 0 }}>· клавиши Q W E R</span></div>
+              <div className="step-title">{tr("1. Тон общения")} <span className="xs muted" style={{ textTransform: "none", letterSpacing: 0 }}>{tr("· клавиши Q W E R")}</span></div>
               <div className="tones">
                 {TONES.map((t) => (
                   <button key={t.id} className={`tone ${tone === t.id ? "on" : ""}`} onClick={() => setTone(t.id)}>
@@ -291,11 +292,11 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
               </div>
             </div>
             <div>
-              <div className="step-title">2. {event ? `«${event.title}»: ваш ход` : "Ваш ход"} <span className="xs muted" style={{ textTransform: "none", letterSpacing: 0 }}>· клавиши 1–4</span></div>
+              <div className="step-title">2. {event ? tr("«{title}»: ваш ход", { title: event.title }) : tr("Ваш ход")} <span className="xs muted" style={{ textTransform: "none", letterSpacing: 0 }}>{tr("· клавиши 1–4")}</span></div>
               <div className="opts">
                 {event?.options.map((o, i) => (
                   <button key={i} className={`opt ${best === i ? "best" : ""}`} disabled={typing} onClick={() => act(student.id, i, tone)}>
-                    <span className="tag"><span className="key">{i + 1}</span>{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}{best === i ? " · ✨ чутьё подсказывает" : ""}</span>
+                    <span className="tag"><span className="key">{i + 1}</span>{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}{best === i ? tr(" · ✨ чутьё подсказывает") : ""}</span>
                     <div>{fmt(o.text, student)}</div>
                   </button>
                 ))}
@@ -303,15 +304,15 @@ export default function CaseView({ sid, go }: { sid: string | null; go: Nav }) {
             </div>
             <div>
               <div className="row" style={{ justifyContent: "space-between" }}>
-                <div className="step-title" style={{ margin: 0 }}>Узнать ученика ({c.questionsLeft} из {questionsPerWeek(level)} вопросов на неделю)</div>
-                <button className="btn sm ghost" onClick={() => setShowAsk((v) => !v)}>{showAsk ? "Скрыть" : "Задать вопрос"}</button>
+                <div className="step-title" style={{ margin: 0 }}>{tr("Узнать ученика ({left} из {total} вопросов на неделю)", { left: c.questionsLeft, total: questionsPerWeek(level) })}</div>
+                <button className="btn sm ghost" onClick={() => setShowAsk((v) => !v)}>{showAsk ? tr("Скрыть") : tr("Задать вопрос")}</button>
               </div>
               {showAsk && (
                 <div className="ask-list" style={{ marginTop: 10 }}>
                   {QUESTIONS.map((q) => (
                     <button key={q.id} className="ask" disabled={c.questionsLeft <= 0 || c.asked.includes(q.id)} onClick={() => ask(student.id, q.id)}>
                       {fmt(q.text, student)}
-                      <small>{c.asked.includes(q.id) ? "✔ уже спрашивали" : `${q.about}${q.needs > 0 ? " · 🔒 нужен контакт" : ""}`}</small>
+                      <small>{c.asked.includes(q.id) ? tr("✔ уже спрашивали") : tr("{about}{needs}", { about: q.about, needs: q.needs > 0 ? tr(" · 🔒 нужен контакт") : "" })}</small>
                     </button>
                   ))}
                 </div>

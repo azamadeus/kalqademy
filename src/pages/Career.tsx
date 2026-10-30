@@ -2,6 +2,7 @@ import { Radar, Ring } from "../components/ui";
 import { ACHIEVEMENTS, PERKS, RANKS, SKILLS, levelOf, rankOf } from "../game/career";
 import { useGame } from "../game/store";
 import type { SkillKey } from "../game/types";
+import { tr } from "../i18n";
 
 export default function Career() {
   const { g, setName, reset } = useGame();
@@ -11,20 +12,20 @@ export default function Career() {
     <div className="stack">
       <div className="grid2" style={{ gridTemplateColumns: "1fr 1fr" }}>
         <div className="panel row wrap" style={{ gap: 22 }}>
-          <Ring value={into / need} size={140} stroke={12} color="#fbbf24" big={level} small="уровень" />
+          <Ring value={into / need} size={140} stroke={12} color="#fbbf24" big={level} small={tr("уровень")} />
           <div className="grow">
-            <div className="lbl">Куратор</div>
-            <input type="text" value={g.curator.name} onChange={(e) => setName(e.target.value)} aria-label="Имя куратора" style={{ fontWeight: 800, fontSize: "1.2rem", marginBottom: 8 }} />
+            <div className="lbl">{tr("Куратор")}</div>
+            <input type="text" value={g.curator.name} onChange={(e) => setName(e.target.value)} aria-label={tr("Имя куратора")} style={{ fontWeight: 800, fontSize: "1.2rem", marginBottom: 8 }} />
             <h3>{rankOf(level).name}</h3>
-            <p className="muted small">Опыт до следующего уровня: {need - into}{next ? ` · дальше: ${next.name} (ур. ${next.level})` : ""}</p>
-            <p className="muted small">Завершено сезонов: {g.curator.casesFinished}</p>
+            <p className="muted small">{tr("Опыт до следующего уровня: {n}", { n: need - into })}{next ? tr(" · дальше: {v} (ур. {level})", { v: next.name, level: next.level }) : ""}</p>
+            <p className="muted small">{tr("Завершено сезонов:")} {g.curator.casesFinished}</p>
           </div>
         </div>
         <div className="panel center"><Radar skills={g.curator.skills} /></div>
       </div>
 
       <div className="panel">
-        <h3>Навыки</h3>
+        <h3>{tr("Навыки")}</h3>
         <div className="grid3" style={{ marginTop: 12 }}>
           {(Object.keys(SKILLS) as SkillKey[]).map((k) => (
             <div key={k} className="perk"><span className="ic">{SKILLS[k].icon}</span><div className="grow"><b>{SKILLS[k].name}</b><div className="xs muted">{SKILLS[k].desc}</div></div><b>{g.curator.skills[k]}</b></div>
@@ -33,13 +34,13 @@ export default function Career() {
       </div>
 
       <div className="panel">
-        <h3>Ступени и возможности</h3>
+        <h3>{tr("Ступени и возможности")}</h3>
         <div className="grid2" style={{ marginTop: 12 }}>
           {PERKS.map((p) => (
             <div key={p.name} className={`perk ${level >= p.level ? "" : "locked"}`}>
               <span className="ic">{p.icon}</span>
               <div className="grow"><b>{p.name}</b><div className="xs muted">{p.desc}</div></div>
-              <span className="pill">{level >= p.level ? "открыто" : `ур. ${p.level}`}</span>
+              <span className="pill">{level >= p.level ? tr("открыто") : tr("ур. {level}", { level: p.level })}</span>
             </div>
           ))}
         </div>
@@ -49,7 +50,7 @@ export default function Career() {
       </div>
 
       <div className="panel">
-        <h3>Достижения · {g.achievements.length}/{ACHIEVEMENTS.length}</h3>
+        <h3>{tr("Достижения ·")} {g.achievements.length}/{ACHIEVEMENTS.length}</h3>
         <div className="gridauto" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", marginTop: 12 }}>
           {ACHIEVEMENTS.map((a) => (
             <div key={a.id} className={`ach ${g.achievements.includes(a.id) ? "" : "locked"}`}>
@@ -60,7 +61,7 @@ export default function Career() {
       </div>
 
       <div className="row" style={{ justifyContent: "flex-end" }}>
-        <button className="btn ghost sm" onClick={() => { if (confirm("Стереть весь прогресс и учеников?")) reset(); }}>Сбросить прогресс</button>
+        <button className="btn ghost sm" onClick={() => { if (confirm(tr("Стереть весь прогресс и учеников?"))) reset(); }}>{tr("Сбросить прогресс")}</button>
       </div>
     </div>
   );

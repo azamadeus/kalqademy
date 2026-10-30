@@ -5,6 +5,7 @@ import { SKILLS } from "../game/career";
 import { STAGES, TOTAL_WEEKS, stageOf, closenessLevel } from "../game/engine";
 import type { Look, Quality, SkillKey, Student, TurnRecord } from "../game/types";
 import { clamp } from "../game/rng";
+import { tr } from "../i18n";
 
 const SKIN = ["#f5d0b5", "#e8b98f", "#d39b6e", "#b9784c", "#8d5a3a"];
 const HAIR = ["#2b2118", "#4a3222", "#7a4a2a", "#1a1a24", "#a0522d", "#c9a06a"];
@@ -21,7 +22,7 @@ export function Avatar({
   const id = `g${look.skin}${look.hair}${look.hairColor}${look.accessory}${c.slice(1)}`;
   const style = gender === "f" ? [1, 5, 2, 3, 1, 5][look.hair % 6] : [0, 4, 0, 4, 3, 0][look.hair % 6];
   return (
-    <svg className="avatar" width={size} height={size} viewBox="0 0 120 120" role="img" aria-label="Аватар ученика">
+    <svg className="avatar" width={size} height={size} viewBox="0 0 120 120" role="img" aria-label={tr("Аватар ученика")}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor={c} stopOpacity="0.95" />
@@ -102,7 +103,7 @@ export function Ladder({ trust }: { trust: number }) {
           </div>
         ))}
       </div>
-      <p className="xs muted center" style={{ marginTop: 6 }}>{CLOSENESS[lvl].hint} · доверие {Math.round(trust)}/100</p>
+      <p className="xs muted center" style={{ marginTop: 6 }}>{CLOSENESS[lvl].hint} {tr("· доверие")} {Math.round(trust)}/100</p>
     </div>
   );
 }
@@ -117,7 +118,7 @@ export function StageTrack({ week }: { week: number }) {
           <div key={s.id} className={`stage ${i < idx ? "done" : ""} ${i === idx ? "cur" : ""}`}><i />{s.icon} {s.name}</div>
         ))}
       </div>
-      <p className="xs muted center" style={{ marginTop: 6 }}>Неделя {week} из {TOTAL_WEEKS}</p>
+      <p className="xs muted center" style={{ marginTop: 6 }}>{tr("Неделя")} {week} {tr("из")} {TOTAL_WEEKS}</p>
     </div>
   );
 }
@@ -175,11 +176,11 @@ const DOT: Record<Quality, string> = { great: "#34d399", good: "#60a5fa", meh: "
 
 export function TurnStrip({ history, week, total }: { history: TurnRecord[]; week: number; total: number }) {
   return (
-    <div className="strip" aria-label="Ход сезона">
+    <div className="strip" aria-label={tr("Ход сезона")}>
       {Array.from({ length: total }, (_, i) => {
         const h = history.find((x) => x.week === i + 1);
         const cur = i + 1 === week;
-        return <span key={i} className={`dot ${cur ? "cur" : ""}`} title={`Неделя ${i + 1}`} style={h ? { background: DOT[h.quality] } : undefined}>{i + 1}</span>;
+        return <span key={i} className={`dot ${cur ? "cur" : ""}`} title={tr("Неделя {i}", { i: i + 1 })} style={h ? { background: DOT[h.quality] } : undefined}>{i + 1}</span>;
       })}
     </div>
   );
@@ -188,15 +189,15 @@ export function TurnStrip({ history, week, total }: { history: TurnRecord[]; wee
 export function Onboarding({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0);
   const steps = [
-    { icon: "🎯", title: "Ваша задача", text: "Вы куратор онлайн-курса ЕНТ. За 12 недель подведите ученика к хорошему баллу и выстройте с ним доверие. У каждого ученика свой тип MBTI, эго-состояние, семья и чувствительная тема. Сначала профиль скрыт." },
-    { icon: "💬", title: "Каждую неделю: тон + тактика", text: "Ученик пишет о проблеме. Выберите тон (от отстранённого до очень тёплого) и один из четырёх вариантов ответа. Слишком близкий тон для малознакомых и слишком холодный для близких снижают доверие. Клавиши 1–4 выбирают ответ, Q W E R тон." },
-    { icon: "🔍", title: "Узнайте ученика", text: "Задавайте вопросы (некоторые открываются только при доверии), читайте ответы и делайте гипотезу о типе, эго-состоянии и чувствительной теме. Это не диагноз, а подсказка для общения." },
-    { icon: "🧭", title: "План и отчёт", text: "Составьте план развития с приёмами из воркбуков ALQA: он даёт бонус в подходящих ситуациях. В «Отчёте» проверьте свою гипотезу: ученик ответит, а система разберёт ошибки. При тревожных сигналах всегда привлекайте школьного психолога." },
+    { icon: "🎯", title: tr("Ваша задача"), text: tr("Вы куратор онлайн-курса ЕНТ. За 12 недель подведите ученика к хорошему баллу и выстройте с ним доверие. У каждого ученика свой тип MBTI, эго-состояние, семья и чувствительная тема. Сначала профиль скрыт.") },
+    { icon: "💬", title: tr("Каждую неделю: тон + тактика"), text: tr("Ученик пишет о проблеме. Выберите тон (от отстранённого до очень тёплого) и один из четырёх вариантов ответа. Слишком близкий тон для малознакомых и слишком холодный для близких снижают доверие. Клавиши 1–4 выбирают ответ, Q W E R тон.") },
+    { icon: "🔍", title: tr("Узнайте ученика"), text: tr("Задавайте вопросы (некоторые открываются только при доверии), читайте ответы и делайте гипотезу о типе, эго-состоянии и чувствительной теме. Это не диагноз, а подсказка для общения.") },
+    { icon: "🧭", title: tr("План и отчёт"), text: tr("Составьте план развития с приёмами из воркбуков ALQA: он даёт бонус в подходящих ситуациях. В «Отчёте» проверьте свою гипотезу: ученик ответит, а система разберёт ошибки. При тревожных сигналах всегда привлекайте школьного психолога.") },
   ];
   const st = steps[i];
   return (
     <div className="modal-bg" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 560, textAlign: "center" }} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Как играть">
+      <div className="modal" style={{ maxWidth: 560, textAlign: "center" }} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={tr("Как играть")}>
         <div style={{ fontSize: "3rem" }}>{st.icon}</div>
         <h2 style={{ margin: "8px 0" }}>{st.title}</h2>
         <p className="muted" style={{ minHeight: 110 }}>{st.text}</p>
@@ -204,9 +205,9 @@ export function Onboarding({ onClose }: { onClose: () => void }) {
           {steps.map((_, k) => <i key={k} style={{ width: k === i ? 22 : 8, height: 8, borderRadius: 8, background: k === i ? "var(--accent)" : "rgba(255,255,255,0.2)", transition: "0.3s" }} />)}
         </div>
         <div className="row" style={{ justifyContent: "center" }}>
-          {i > 0 && <button className="btn ghost" onClick={() => setI(i - 1)}>Назад</button>}
-          {i < steps.length - 1 ? <button className="btn" onClick={() => setI(i + 1)}>Дальше</button> : <button className="btn" onClick={onClose}>Начать</button>}
-          <button className="btn ghost" onClick={onClose}>Пропустить</button>
+          {i > 0 && <button className="btn ghost" onClick={() => setI(i - 1)}>{tr("Назад")}</button>}
+          {i < steps.length - 1 ? <button className="btn" onClick={() => setI(i + 1)}>{tr("Дальше")}</button> : <button className="btn" onClick={onClose}>{tr("Начать")}</button>}
+          <button className="btn ghost" onClick={onClose}>{tr("Пропустить")}</button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import * as A from "./actions";
 import { ACHIEVEMENTS, levelOf } from "./career";
 import type { GameState, Hypothesis, Plan, ReportInput, Student, Tone } from "./types";
+import { tr } from "../i18n";
 
 const KEY = "kalqademy:v2";
 
@@ -64,7 +65,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const lv = levelOf(g.curator.xp).level;
     const add: Toast[] = [];
     if (lv > prevLevel.current) {
-      add.push({ id: toastId.current++, kind: "level", icon: "⭐", title: `Уровень ${lv}!`, text: "Вы выросли как куратор. Загляните в «Путь куратора»: открылись новые возможности." });
+      add.push({ id: toastId.current++, kind: "level", icon: "⭐", title: tr("Уровень {lv}!", { lv }), text: tr("Вы выросли как куратор. Загляните в «Путь куратора»: открылись новые возможности.") });
     }
     prevLevel.current = lv;
     if (fresh.length) {

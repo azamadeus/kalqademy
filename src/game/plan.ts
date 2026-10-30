@@ -5,6 +5,7 @@ import { PROBLEMS, familyById } from "../data/world";
 import { bestTone, dominantEgo, preferredWarmth, STAGES, woundOf } from "./engine";
 import { TONES } from "./text";
 import type { CaseState, EgoKey, Letter, Plan, PlanResult, ProblemKey, Stage, Student } from "./types";
+import { tr } from "../i18n";
 
 export const emptyPlan = (student: Student): Plan => ({
   goalScore: Math.min(140, student.mock + 30),
@@ -67,29 +68,29 @@ export const planBonusFor = (score: number) => (score >= 60 ? 3 : score >= 35 ? 
 
 const PLAN_VOICE: Record<EgoKey, { low: string; mid: string; high: string }> = {
   caring_parent: {
-    low: "Я посмотрел{а} план… В нём совсем нет места для моей усталости. Кажется, я опять {должен|должна} всё тянуть сам{а}.",
-    mid: "План неплохой. Мне нравится, что есть время и для меня. Надеюсь, получится его придерживаться.",
-    high: "В этом плане меня наконец увидели: и цель, и мой отдых, и границы. Я чувствую, что могу выдохнуть.",
+    low: tr("Я посмотрел{а} план… В нём совсем нет места для моей усталости. Кажется, я опять {должен|должна} всё тянуть сам{а}."),
+    mid: tr("План неплохой. Мне нравится, что есть время и для меня. Надеюсь, получится его придерживаться."),
+    high: tr("В этом плане меня наконец увидели: и цель, и мой отдых, и границы. Я чувствую, что могу выдохнуть."),
   },
   critical_parent: {
-    low: "Тут слишком много лишнего и ничего про мою тревогу. Я боюсь, что мы потеряем время.",
-    mid: "План выглядит разумно, хотя я всё равно волнуюсь, смогу ли выполнить всё идеально.",
-    high: "Понятный план с шагами и разрешением на ошибки. Впервые не страшно начинать.",
+    low: tr("Тут слишком много лишнего и ничего про мою тревогу. Я боюсь, что мы потеряем время."),
+    mid: tr("План выглядит разумно, хотя я всё равно волнуюсь, смогу ли выполнить всё идеально."),
+    high: tr("Понятный план с шагами и разрешением на ошибки. Впервые не страшно начинать."),
   },
   adult: {
-    low: "План расплывчатый: нет критериев и логики, зачем эти шаги. Трудно воспринимать всерьёз.",
-    mid: "Структура есть, но хотелось бы больше конкретных критериев и сроков.",
-    high: "Чёткие цели, этапы и метрики. Это то, что мне нужно. {Согласен|Согласна} работать по этому плану.",
+    low: tr("План расплывчатый: нет критериев и логики, зачем эти шаги. Трудно воспринимать всерьёз."),
+    mid: tr("Структура есть, но хотелось бы больше конкретных критериев и сроков."),
+    high: tr("Чёткие цели, этапы и метрики. Это то, что мне нужно. {Согласен|Согласна} работать по этому плану."),
   },
   adapted_child: {
-    low: "Мне кажется, это план для кого-то другого. Меня никто не спрашивал, чего хочу я…",
-    mid: "Наверное, нормально. Мне бы хотелось, чтобы вы спросили, {согласен|согласна} ли я с шагами.",
-    high: "Тут учтено то, что мне важно, и мне не страшно сказать своё мнение. Спасибо, что со мной договорились.",
+    low: tr("Мне кажется, это план для кого-то другого. Меня никто не спрашивал, чего хочу я…"),
+    mid: tr("Наверное, нормально. Мне бы хотелось, чтобы вы спросили, {согласен|согласна} ли я с шагами."),
+    high: tr("Тут учтено то, что мне важно, и мне не страшно сказать своё мнение. Спасибо, что со мной договорились."),
   },
   natural_child: {
-    low: "Скукота! Опять списки и правила. Я на такое не подпишусь.",
-    mid: "Местами норм, местами скучно. Можно добавить больше игры и наград?",
-    high: "О, тут и цели, и награды, и мини-победы! Давайте начинать, я в деле!",
+    low: tr("Скукота! Опять списки и правила. Я на такое не подпишусь."),
+    mid: tr("Местами норм, местами скучно. Можно добавить больше игры и наград?"),
+    high: tr("О, тут и цели, и награды, и мини-победы! Давайте начинать, я в деле!"),
   },
 };
 
@@ -135,38 +136,38 @@ export function evaluatePlan(student: Student, c: CaseState, plan: Plan, at: num
   const expert: string[] = [];
   expert.push(
     goal >= 0.9
-      ? `✅ Цель ${g} реалистична: рост ${g - mock} баллов за 12 недель выполним.`
+      ? tr("✅ Цель {g} реалистична: рост {mock} баллов за 12 недель выполним.", { g, mock: g - mock })
       : g <= mock
-        ? `❌ Цель ${g} не выше стартового балла ${mock}. Нужен рост хотя бы на 15 баллов.`
+        ? tr("❌ Цель {g} не выше стартового балла {mock}. Нужен рост хотя бы на 15 баллов.", { g, mock })
         : g < lo
-          ? `⚠️ Цель ${g} слишком скромная: можно ставить ${lo}–${hi}.`
-          : `⚠️ Цель ${g} слишком амбициозна для 12 недель (разумно до ${hi}): риск разочарования и стресса.`,
+          ? tr("⚠️ Цель {g} слишком скромная: можно ставить {lo}–{hi}.", { g, lo, hi })
+          : tr("⚠️ Цель {g} слишком амбициозна для 12 недель (разумно до {hi}): риск разочарования и стресса.", { g, hi }),
   );
-  if (!plan.focus.length) expert.push("❌ Не выбраны приоритетные проблемные зоны.");
-  else if (reveal) expert.push(`${focusHits === 3 ? "✅" : "⚠️"} Совпало приоритетов: ${focusHits} из 3. Главные зоны ученика: ${top.map((p) => PROBLEMS[p]).join(", ")}.`);
-  else expert.push(`${focusHits === 3 ? "✅" : "⚠️"} Совпало приоритетов: ${focusHits} из 3. Точные зоны откроются, когда профиль станет известен.`);
-  if (!chosen.length) expert.push("❌ В плане нет ни одного приёма из воркбуков.");
-  else expert.push(`${fit >= 0.65 ? "✅" : fit >= 0.4 ? "⚠️" : "❌"} Подходящесть приёмов этому ученику: ${parts.fit}%.`);
+  if (!plan.focus.length) expert.push(tr("❌ Не выбраны приоритетные проблемные зоны."));
+  else if (reveal) expert.push(tr("{focusHits} Совпало приоритетов: {focusHits2} из 3. Главные зоны ученика: {v}.", { focusHits: focusHits === 3 ? "✅" : "⚠️", focusHits2: focusHits, v: top.map((p) => PROBLEMS[p]).join(", ") }));
+  else expert.push(tr("{focusHits} Совпало приоритетов: {focusHits2} из 3. Точные зоны откроются, когда профиль станет известен.", { focusHits: focusHits === 3 ? "✅" : "⚠️", focusHits2: focusHits }));
+  if (!chosen.length) expert.push(tr("❌ В плане нет ни одного приёма из воркбуков."));
+  else expert.push(tr("{fit} Подходящесть приёмов этому ученику: {fit2}%.", { fit: fit >= 0.65 ? "✅" : fit >= 0.4 ? "⚠️" : "❌", fit2: parts.fit }));
   const weak = chosen.filter((x) => interventionFit(student, x.iv, x.stage) < 0.4);
-  if (weak.length) expert.push(`Слабее всего подходят: ${weak.slice(0, 3).map((x) => `«${x.iv.title}» (${ivSource(x.iv)})`).join(", ")}.`);
+  if (weak.length) expert.push(tr("Слабее всего подходят: {list}.", { list: weak.slice(0, 3).map((x) => `«${x.iv.title}» (${ivSource(x.iv)})`).join(", ") }));
   const missing = STAGES.filter((s) => !plan.steps[s.id].interventionIds.length).map((s) => s.name);
-  if (missing.length) expert.push(`⚠️ Не заполнены этапы: ${missing.join(", ")}.`);
-  if (plan.metrics.trim().length < 20) expert.push("⚠️ Опишите метрики успеха: что именно будет считаться прогрессом (баллы пробников, режим, стресс).");
-  if (plan.message.trim().length < 20) expert.push("⚠️ Добавьте, что именно вы скажете ученику: план должен быть озвучен и согласован с ним.");
-  if (needsFamily && plan.family.trim().length < 15) expert.push("⚠️ Для такой семьи нужен продуманный план работы с родителями.");
+  if (missing.length) expert.push(tr("⚠️ Не заполнены этапы: {v}.", { v: missing.join(", ") }));
+  if (plan.metrics.trim().length < 20) expert.push(tr("⚠️ Опишите метрики успеха: что именно будет считаться прогрессом (баллы пробников, режим, стресс)."));
+  if (plan.message.trim().length < 20) expert.push(tr("⚠️ Добавьте, что именно вы скажете ученику: план должен быть озвучен и согласован с ним."));
+  if (needsFamily && plan.family.trim().length < 15) expert.push(tr("⚠️ Для такой семьи нужен продуманный план работы с родителями."));
   expert.push(
     plan.tone == null
-      ? "❌ Не выбран тон общения."
+      ? tr("❌ Не выбран тон общения.")
       : tone >= 0.75
-        ? `✅ Тон «${TONES[plan.tone].name}» подходит ученику.`
-        : `⚠️ Ученику ближе тон «${TONES[bestTone(student, c.trust)].name}».`,
+        ? tr("✅ Тон «{v}» подходит ученику.", { v: TONES[plan.tone].name })
+        : tr("⚠️ Ученику ближе тон «{v}».", { v: TONES[bestTone(student, c.trust)].name }),
   );
   const recs = INTERVENTIONS.filter((iv) => !chosen.some((x) => x.iv.id === iv.id))
     .map((iv) => ({ iv, f: interventionFit(student, iv) }))
     .sort((a, b) => b.f - a.f)
     .slice(0, 3);
-  expert.push(`Что стоило бы добавить: ${recs.map((r) => `«${r.iv.title}» (${ivSource(r.iv)})`).join(", ")}.`);
-  if (reveal) expert.push(`Ориентир ALQA для «${egoInfo.name}»: ${egoInfo.motivate[0].toLowerCase()}.`);
+  expert.push(tr("Что стоило бы добавить: {list}.", { list: recs.map((r) => `«${r.iv.title}» (${ivSource(r.iv)})`).join(", ") }));
+  if (reveal) expert.push(tr("Ориентир ALQA для «{v}»: {v2}.", { v: egoInfo.name, v2: egoInfo.motivate[0].toLowerCase() }));
 
   const band = score >= 70 ? "high" : score >= 40 ? "mid" : "low";
   return {

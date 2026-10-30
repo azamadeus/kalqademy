@@ -8,6 +8,7 @@ import { createStudent } from "../game/generate";
 import { useGame } from "../game/store";
 import type { EgoKey } from "../game/types";
 import type { Nav } from "../App";
+import { tr } from "../i18n";
 
 const AXES: [string, string][] = [["E", "I"], ["S", "N"], ["T", "F"], ["J", "P"]];
 const newSeed = () => Math.floor(Math.random() * 900000) + 100;
@@ -64,20 +65,20 @@ export default function Studio({ go }: { go: Nav }) {
   return (
     <div className="stack">
       <div className="row wrap" style={{ justifyContent: "space-between" }}>
-        <div><h2>Студия учеников</h2><p className="muted small">Соберите ученика по своему желанию или получите случайного. Параметры можно скрыть: тогда профиль придётся диагностировать.</p></div>
+        <div><h2>{tr("Студия учеников")}</h2><p className="muted small">{tr("Соберите ученика по своему желанию или получите случайного. Параметры можно скрыть: тогда профиль придётся диагностировать.")}</p></div>
         <div className="row wrap">
-          <button className="btn ghost" onClick={randomize}>🎲 Случайный</button>
-          <button className="btn ghost" onClick={group}>👥 Случайная группа (4, вслепую)</button>
+          <button className="btn ghost" onClick={randomize}>{tr("🎲 Случайный")}</button>
+          <button className="btn ghost" onClick={group}>{tr("👥 Случайная группа (4, вслепую)")}</button>
         </div>
       </div>
       <div className="grid2" style={{ gridTemplateColumns: "1.2fr 0.8fr", alignItems: "start" }}>
         <div className="panel">
           <div className="grid2">
-            <div className="field"><label>Имя (необязательно)</label><input type="text" value={name} placeholder="Случайное" onChange={(e) => setName(e.target.value)} /></div>
-            <div className="field"><label>Пол</label><div className="seg"><button className={gender === "f" ? "on" : ""} onClick={() => setGender("f")}>Девушка</button><button className={gender === "m" ? "on" : ""} onClick={() => setGender("m")}>Парень</button></div></div>
+            <div className="field"><label>{tr("Имя (необязательно)")}</label><input type="text" value={name} placeholder={tr("Случайное")} onChange={(e) => setName(e.target.value)} /></div>
+            <div className="field"><label>{tr("Пол")}</label><div className="seg"><button className={gender === "f" ? "on" : ""} onClick={() => setGender("f")}>{tr("Девушка")}</button><button className={gender === "m" ? "on" : ""} onClick={() => setGender("m")}>{tr("Парень")}</button></div></div>
           </div>
           <div className="field">
-            <label>Тип MBTI · {mbti} «{TYPES[mbti].nick}»</label>
+            <label>{tr("Тип MBTI · {mbti} «{nick}»", { mbti, nick: TYPES[mbti].nick })}</label>
             <div className="row wrap">
               {AXES.map(([a, b], i) => (
                 <div className="seg" key={a}>
@@ -88,7 +89,7 @@ export default function Studio({ go }: { go: Nav }) {
             </div>
           </div>
           <div className="field">
-            <label>Доминирующее эго-состояние</label>
+            <label>{tr("Доминирующее эго-состояние")}</label>
             <div className="grid2" style={{ gap: 8 }}>
               {EGO_ORDER.map((k) => (
                 <button key={k} className={`choice ${dom === k ? "on" : ""}`} onClick={() => { setDom(k); if (sec === k) setSec(EGO_ORDER.find((x) => x !== k)!); }}>
@@ -99,21 +100,21 @@ export default function Studio({ go }: { go: Nav }) {
             </div>
           </div>
           <div className="field">
-            <label>Второе по силе эго-состояние</label>
+            <label>{tr("Второе по силе эго-состояние")}</label>
             <select value={sec} onChange={(e) => setSec(e.target.value as EgoKey)}>
               {EGO_ORDER.filter((k) => k !== dom).map((k) => <option key={k} value={k}>{EGO[k].emoji} {EGO[k].name}</option>)}
             </select>
           </div>
           <div className="grid2">
-            <div className="field"><label>Семья</label><select value={fam} onChange={(e) => setFam(e.target.value)}>{FAMILIES.map((f) => <option key={f.id} value={f.id}>{f.icon} {f.label}</option>)}</select></div>
-            <div className="field"><label>Цель</label><select value={goal} onChange={(e) => setGoal(e.target.value)}>{GOALS.map((g) => <option key={g.id} value={g.id}>{g.icon} {g.profession}</option>)}</select></div>
+            <div className="field"><label>{tr("Семья")}</label><select value={fam} onChange={(e) => setFam(e.target.value)}>{FAMILIES.map((f) => <option key={f.id} value={f.id}>{f.icon} {f.label}</option>)}</select></div>
+            <div className="field"><label>{tr("Цель")}</label><select value={goal} onChange={(e) => setGoal(e.target.value)}>{GOALS.map((g) => <option key={g.id} value={g.id}>{g.icon} {g.profession}</option>)}</select></div>
           </div>
-          <div className="field"><label>Чувствительная тема</label><select value={wound} onChange={(e) => setWound(e.target.value as WoundKey | "")}><option value="">Определить автоматически</option>{WOUND_ORDER.map((w) => <option key={w} value={w}>{WOUNDS[w].emoji} {WOUNDS[w].name}</option>)}</select></div>
-          <div className="field"><label>Онлайн-курс</label><select value={course} onChange={(e) => setCourse(e.target.value)}>{COURSES.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.price}</option>)}</select></div>
-          <div className="field"><label>Стартовый балл на пробнике: {mock} / 140</label><input type="range" min={40} max={110} value={mock} onChange={(e) => setMock(+e.target.value)} /></div>
+          <div className="field"><label>{tr("Чувствительная тема")}</label><select value={wound} onChange={(e) => setWound(e.target.value as WoundKey | "")}><option value="">{tr("Определить автоматически")}</option>{WOUND_ORDER.map((w) => <option key={w} value={w}>{WOUNDS[w].emoji} {WOUNDS[w].name}</option>)}</select></div>
+          <div className="field"><label>{tr("Онлайн-курс")}</label><select value={course} onChange={(e) => setCourse(e.target.value)}>{COURSES.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.price}</option>)}</select></div>
+          <div className="field"><label>{tr("Стартовый балл на пробнике:")} {mock} / 140</label><input type="range" min={40} max={110} value={mock} onChange={(e) => setMock(+e.target.value)} /></div>
           <label className="row small" style={{ cursor: "pointer" }}>
             <input type="checkbox" checked={blind} onChange={(e) => setBlind(e.target.checked)} />
-            Скрыть тип и эго-состояние (режим диагностики)
+            {tr("Скрыть тип и эго-состояние (режим диагностики)")}
           </label>
         </div>
 
@@ -133,7 +134,7 @@ export default function Studio({ go }: { go: Nav }) {
             {EGO_ORDER.map((k) => <Bar key={k} label={EGO[k].name} value={st.ego[k]} color={EGO[k].color} />)}
           </div>
           <p className="xs muted" style={{ textAlign: "left" }}>{familyById(st.familyId).icon} {familyById(st.familyId).label}<br />💳 {courseById(st.courseId).name}</p>
-          <button className="btn lg" style={{ width: "100%", marginTop: 14 }} onClick={add}>Добавить и начать →</button>
+          <button className="btn lg" style={{ width: "100%", marginTop: 14 }} onClick={add}>{tr("Добавить и начать →")}</button>
         </div>
       </div>
     </div>

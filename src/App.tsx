@@ -11,19 +11,20 @@ import Studio from "./pages/Studio";
 import { levelOf, rankOf } from "./game/career";
 import { createStudent } from "./game/generate";
 import { GameProvider, useGame } from "./game/store";
+import { LANG, setLang, tr } from "./i18n";
 
 export type View = "home" | "roster" | "studio" | "case" | "plan" | "report" | "career" | "knowledge";
 export type Nav = (v: View, sid?: string) => void;
 
 const TABS: { id: View; label: string }[] = [
-  { id: "home", label: "Главная" },
-  { id: "roster", label: "Ученики" },
-  { id: "studio", label: "Студия" },
-  { id: "case", label: "Диалог" },
-  { id: "plan", label: "План" },
-  { id: "report", label: "Отчёт" },
-  { id: "career", label: "Путь куратора" },
-  { id: "knowledge", label: "База знаний" },
+  { id: "home", label: tr("Главная") },
+  { id: "roster", label: tr("Ученики") },
+  { id: "studio", label: tr("Студия") },
+  { id: "case", label: tr("Диалог") },
+  { id: "plan", label: tr("План") },
+  { id: "report", label: tr("Отчёт") },
+  { id: "career", label: tr("Путь куратора") },
+  { id: "knowledge", label: tr("База знаний") },
 ];
 
 function Shell() {
@@ -61,12 +62,13 @@ function Shell() {
       <div className="app">
         <header className="nav">
           <button className="brand" onClick={() => go("home")}><span className="logo">🎓</span>Kalqademy</button>
-          <nav className="tabs" aria-label="Разделы">
+          <nav className="tabs" aria-label={tr("Разделы")}>
             {TABS.map((t) => (
               <button key={t.id} className={`tab ${view === t.id ? "on" : ""}`} onClick={() => go(t.id)}>{t.label}</button>
             ))}
           </nav>
-          <button className="help-btn" aria-label="Как играть" title="Как играть" onClick={() => setHelp(true)}>?</button>
+          <button className="help-btn" aria-label={tr("Как играть")} title={tr("Как играть")} onClick={() => setHelp(true)}>?</button>
+          <button className="help-btn" style={{ width: "auto", padding: "0 10px" }} aria-label={tr("Язык")} title={tr("Язык")} onClick={() => setLang(LANG === "kk" ? "ru" : "kk")}>{LANG === "kk" ? "ҚАЗ → РУС" : "РУС → ҚАЗ"}</button>
           <div className="chip-user" onClick={() => go("career")} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && go("career")}>
             <Ring value={into / need} size={38} stroke={4} color="#fbbf24" big={<span style={{ fontSize: "0.9rem" }}>{level}</span>} small="" />
             <div><strong>{g.curator.name}</strong><small>{rankOf(level).name}</small></div>

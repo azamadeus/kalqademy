@@ -6,6 +6,7 @@ import { EXERCISES, EX_GROUPS, type ExGroup } from "../data/exercises";
 import { INTERVENTIONS, WORKBOOKS } from "../data/workbooks";
 import { CLOSENESS, TACTICS, TONES } from "../game/text";
 import type { EgoKey, Tactic } from "../game/types";
+import { tr } from "../i18n";
 
 type Sec = { heading: string; lines: string[] };
 interface Docx { egoStates: Record<string, Sec[]>; types: Record<string, Sec[]> }
@@ -29,7 +30,7 @@ function List({ items }: { items: string[] }) {
   return <ul className="list">{items.map((x) => <li key={x}>{x}</li>)}</ul>;
 }
 
-function Original({ sections, pdf, label = "Оригинал: методичка (қазақша, mbti_kz_1.docx)" }: { sections?: Sec[]; pdf?: string[] | null; label?: string }) {
+function Original({ sections, pdf, label = tr("Оригинал: методичка (қазақша, mbti_kz_1.docx)") }: { sections?: Sec[]; pdf?: string[] | null; label?: string }) {
   return (
     <div>
       {sections && sections.length > 0 && (
@@ -45,9 +46,9 @@ function Original({ sections, pdf, label = "Оригинал: методичка
       )}
       {pdf && pdf.length > 0 && (
         <details>
-          <summary>🖼 Оригинал: слайды ALQA ({pdf.length} стр., текст)</summary>
+          <summary>{tr("🖼 Оригинал: слайды ALQA ({n} стр., текст)", { n: pdf.length })}</summary>
           {pdf.map((p, i) => (
-            <div key={i} style={{ marginTop: 8 }}><span className="xs muted">Слайд {i + 1}</span><div className="src">{p}</div></div>
+            <div key={i} style={{ marginTop: 8 }}><span className="xs muted">{tr("Слайд")} {i + 1}</span><div className="src">{p}</div></div>
           ))}
         </details>
       )}
@@ -64,7 +65,7 @@ function Modal({ onClose, children }: { onClose: () => void; children: React.Rea
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <div className="row" style={{ justifyContent: "flex-end" }}><button className="btn sm ghost" onClick={onClose}>Закрыть ✕</button></div>
+        <div className="row" style={{ justifyContent: "flex-end" }}><button className="btn sm ghost" onClick={onClose}>{tr("Закрыть ✕")}</button></div>
         {children}
       </div>
     </div>
@@ -79,20 +80,20 @@ function EgoModal({ k, onClose }: { k: EgoKey; onClose: () => void }) {
       <h2>{e.emoji} {e.name}</h2>
       <p className="muted" style={{ margin: "8px 0 14px" }}>{e.desc}</p>
       <div className="grid2">
-        <div><h4>Как проявляется</h4><List items={e.signs} /><h4>Синдромы и роли</h4><List items={e.syndromes} /><h4>Корни (травмы)</h4><List items={e.traumas} /><h4>Глубинные убеждения</h4><List items={e.beliefs} /></div>
+        <div><h4>{tr("Как проявляется")}</h4><List items={e.signs} /><h4>{tr("Синдромы и роли")}</h4><List items={e.syndromes} /><h4>{tr("Корни (травмы)")}</h4><List items={e.traumas} /><h4>{tr("Глубинные убеждения")}</h4><List items={e.beliefs} /></div>
         <div>
-          <h4>Как мотивировать</h4><List items={e.motivate} />
-          <h4>Что говорить</h4>{e.say.map((x) => <div key={x} className="quote">{x}</div>)}
-          <h4>Что ему нужно услышать</h4>{e.hear.map((x) => <div key={x} className="quote">{x}</div>)}
-          <h4>Чего избегать</h4><List items={e.avoid} />
-          <h4>Упражнения</h4><List items={e.exercises} />
+          <h4>{tr("Как мотивировать")}</h4><List items={e.motivate} />
+          <h4>{tr("Что говорить")}</h4>{e.say.map((x) => <div key={x} className="quote">{x}</div>)}
+          <h4>{tr("Что ему нужно услышать")}</h4>{e.hear.map((x) => <div key={x} className="quote">{x}</div>)}
+          <h4>{tr("Чего избегать")}</h4><List items={e.avoid} />
+          <h4>{tr("Упражнения")}</h4><List items={e.exercises} />
         </div>
       </div>
       <p className="small muted" style={{ margin: "8px 0" }}>{e.low}</p>
       {k === "adapted_child" && (
         <details>
-          <summary>🧰 Действия, снижающие «удобное» состояние (приложение ALQA, 49)</summary>
-          <p className="xs muted" style={{ marginTop: 6 }}>Полный список с группами во вкладке «Упражнения».</p>
+          <summary>{tr("🧰 Действия, снижающие «удобное» состояние (приложение ALQA, 49)")}</summary>
+          <p className="xs muted" style={{ marginTop: 6 }}>{tr("Полный список с группами во вкладке «Упражнения».")}</p>
           <ul className="list">{EXERCISES.slice(0, 12).map((x) => <li key={x.n}><b>{x.title}.</b> {x.how}</li>)}</ul>
         </details>
       )}
@@ -109,19 +110,19 @@ function TypeModal({ code, onClose }: { code: string; onClose: () => void }) {
   return (
     <Modal onClose={onClose}>
       <h2><span style={{ color: gr.color }}>{t.code}</span> · {t.nick}</h2>
-      <p className="muted small">{gr.name} · позиция в треугольнике Карпмана: {t.karpman.map((k) => ({ rescuer: "Спасатель", persecutor: "Преследователь", victim: "Жертва" })[k]).join(" / ")}</p>
+      <p className="muted small">{gr.name} {tr("· позиция в треугольнике Карпмана:")} {t.karpman.map((k) => ({ rescuer: tr("Спасатель"), persecutor: tr("Преследователь"), victim: tr("Жертва") })[k]).join(" / ")}</p>
       <p style={{ margin: "10px 0" }}>{t.summary}</p>
       <p className="muted small">{t.motives}</p>
       <div className="grid2" style={{ marginTop: 10 }}>
-        <div><h4>Сильные стороны ученика</h4><List items={t.studentPlus} /><h4>Слабые стороны ученика</h4><List items={t.studentMinus} /><h4>Страхи</h4><List items={t.fears} /></div>
-        <div><h4>Психологические трудности</h4><List items={t.problems} /><h4>Что работает</h4><List items={t.works} /><h4>Чего избегать</h4><List items={t.avoids} /></div>
+        <div><h4>{tr("Сильные стороны ученика")}</h4><List items={t.studentPlus} /><h4>{tr("Слабые стороны ученика")}</h4><List items={t.studentMinus} /><h4>{tr("Страхи")}</h4><List items={t.fears} /></div>
+        <div><h4>{tr("Психологические трудности")}</h4><List items={t.problems} /><h4>{tr("Что работает")}</h4><List items={t.works} /><h4>{tr("Чего избегать")}</h4><List items={t.avoids} /></div>
       </div>
       <Original sections={docx?.types?.[code]} pdf={pdf?.pages} />
     </Modal>
   );
 }
 
-const TABS = ["Эго-состояния", "Типы MBTI", "Воркбуки", "Упражнения", "Чувствительные темы", "Этика", "Тон общения", "Тактики"] as const;
+const TABS = [tr("Эго-состояния"), tr("Типы MBTI"), tr("Воркбуки"), tr("Упражнения"), tr("Чувствительные темы"), tr("Этика"), tr("Тон общения"), tr("Тактики")] as const;
 
 interface Wb { topics: { num: number; title: string; pages: string[] }[] }
 
@@ -133,10 +134,10 @@ function ExercisesTab() {
   return (
     <div className="stack">
       <div className="panel">
-        <h3>Действия, снижающие состояние «ыңғайлы» (удобного Приспосабливающегося Ребёнка)</h3>
-        <p className="muted small" style={{ marginTop: 6 }}>49 упражнений из приложения ALQA. Они помогают ученикам и кураторам с сильным Приспосабливающимся Ребёнком: учат слышать свои желания, ошибаться, говорить «нет» и заботиться о себе. Часть из них используется как приёмы в плане развития.</p>
+        <h3>{tr("Действия, снижающие состояние «ыңғайлы» (удобного Приспосабливающегося Ребёнка)")}</h3>
+        <p className="muted small" style={{ marginTop: 6 }}>{tr("49 упражнений из приложения ALQA. Они помогают ученикам и кураторам с сильным Приспосабливающимся Ребёнком: учат слышать свои желания, ошибаться, говорить «нет» и заботиться о себе. Часть из них используется как приёмы в плане развития.")}</p>
         <div className="row wrap gap8" style={{ marginTop: 10 }}>
-          <button className={`btn sm ${g === "all" ? "" : "ghost"}`} onClick={() => setG("all")}>Все · 49</button>
+          <button className={`btn sm ${g === "all" ? "" : "ghost"}`} onClick={() => setG("all")}>{tr("Все · 49")}</button>
           {(Object.keys(EX_GROUPS) as ExGroup[]).map((k) => <button key={k} className={`btn sm ${g === k ? "" : "ghost"}`} onClick={() => setG(k)}>{EX_GROUPS[k].icon} {EX_GROUPS[k].name}</button>)}
         </div>
       </div>
@@ -150,29 +151,29 @@ function ExercisesTab() {
         ))}
       </div>
       <details onToggle={(e) => (e.currentTarget as HTMLDetailsElement).open && raw === null && load()}>
-        <summary>📄 Оригинал на казахском (49 пунктов)</summary>
-        <div className="src">{raw ?? "Загрузка…"}</div>
+        <summary>{tr("📄 Оригинал на казахском (49 пунктов)")}</summary>
+        <div className="src">{raw ?? tr("Загрузка…")}</div>
       </details>
     </div>
   );
 }
 
 export default function Knowledge() {
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Эго-состояния");
+  const [tab, setTab] = useState<(typeof TABS)[number]>(tr("Эго-состояния"));
   const [ego, setEgo] = useState<EgoKey | null>(null);
   const [type, setType] = useState<string | null>(null);
-  const wb = useJson<Wb>(tab === "Воркбуки" ? "workbooks.json" : null);
+  const wb = useJson<Wb>(tab === tr("Воркбуки") ? "workbooks.json" : null);
   return (
     <div className="stack">
       <div>
-        <h2>База знаний</h2>
-        <p className="muted small">Сводка по материалам ALQA Academy: эго-состояния, 16 типов MBTI и воркбуки по трансактному анализу. Внутри — оригиналы на казахском.</p>
+        <h2>{tr("База знаний")}</h2>
+        <p className="muted small">{tr("Сводка по материалам ALQA Academy: эго-состояния, 16 типов MBTI и воркбуки по трансактному анализу. Внутри — оригиналы на казахском.")}</p>
       </div>
       <div className="row wrap gap8">
         {TABS.map((t) => <button key={t} className={`btn sm ${tab === t ? "" : "ghost"}`} onClick={() => setTab(t)}>{t}</button>)}
       </div>
 
-      {tab === "Эго-состояния" && (
+      {tab === tr("Эго-состояния") && (
         <div className="gridauto">
           {EGO_ORDER.map((k) => (
             <button key={k} className="tcard" style={{ borderColor: `${EGO[k].color}88` }} onClick={() => setEgo(k)}>
@@ -184,7 +185,7 @@ export default function Knowledge() {
         </div>
       )}
 
-      {tab === "Типы MBTI" && (
+      {tab === tr("Типы MBTI") && (
         <div className="stack">
           {(Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((gk) => (
             <div key={gk}>
@@ -202,56 +203,56 @@ export default function Knowledge() {
         </div>
       )}
 
-      {tab === "Воркбуки" && (
+      {tab === tr("Воркбуки") && (
         <div className="stack">
           {WORKBOOKS.map((t) => {
             const src = wb?.topics?.find((x) => x.num === t.num);
             return (
               <div key={t.num} className="panel">
-                <h3>Воркбук №{t.num}. {t.title}</h3>
+                <h3>{tr("Воркбук №{n}.", { n: t.num })} {t.title}</h3>
                 <p className="muted" style={{ margin: "8px 0" }}>{t.summary}</p>
                 <div className="grid2">
-                  <div><h4>Ключевые идеи</h4><List items={t.concepts} /></div>
-                  <div><h4>Задания</h4><List items={t.tasks} /></div>
+                  <div><h4>{tr("Ключевые идеи")}</h4><List items={t.concepts} /></div>
+                  <div><h4>{tr("Задания")}</h4><List items={t.tasks} /></div>
                 </div>
-                <h4>Приёмы для плана развития</h4>
+                <h4>{tr("Приёмы для плана развития")}</h4>
                 <div className="row wrap gap8" style={{ margin: "6px 0 10px" }}>
                   {INTERVENTIONS.filter((i) => i.wb === t.num).map((i) => <span key={i.id} className="pill" title={i.how}>{i.title}</span>)}
                 </div>
-                {src && <Original label="Оригинал воркбука (қазақша)" sections={[{ heading: "", lines: src.pages }]} />}
+                {src && <Original label={tr("Оригинал воркбука (қазақша)")} sections={[{ heading: "", lines: src.pages }]} />}
               </div>
             );
           })}
-          <p className="xs muted">Загружено 12 из 13 воркбуков (№1–12). Оригиналы на казахском сохранены для №1–4 и 9–12; для №5–8 материалы пришли текстом, оригинал в базу не включён.</p>
+          <p className="xs muted">{tr("Загружено 12 из 13 воркбуков (№1–12). Оригиналы на казахском сохранены для №1–4 и 9–12; для №5–8 материалы пришли текстом, оригинал в базу не включён.")}</p>
         </div>
       )}
 
-      {tab === "Упражнения" && <ExercisesTab />}
+      {tab === tr("Упражнения") && <ExercisesTab />}
 
-      {tab === "Чувствительные темы" && (
+      {tab === tr("Чувствительные темы") && (
         <div className="stack">
           <div className="panel" style={{ borderColor: "#fbbf24" }}>
-            <h3>⚠️ Как это использовать</h3>
-            <p className="muted small" style={{ marginTop: 6 }}>Пять «чувствительных тем» (отвержение, покинутость, унижение, предательство, несправедливость) взяты из популярной книги Л. Бурбо «Пять травм, которые мешают быть самим собой». Автор сама отмечает, что научных доказательств нет. Здесь используется только поведенческая часть: что человек говорит, чего боится и как реагирует на обратную связь. Телосложение, внешность и медицинские утверждения книги <b>не используются и не рекомендуются</b>: определять особенности человека, тем более школьника, по телу ненаучно и ранит. Это гипотеза для настройки общения, не диагноз; ученику ярлык не называется.</p>
+            <h3>{tr("⚠️ Как это использовать")}</h3>
+            <p className="muted small" style={{ marginTop: 6 }}>{tr("Пять «чувствительных тем» (отвержение, покинутость, унижение, предательство, несправедливость) взяты из популярной книги Л. Бурбо «Пять травм, которые мешают быть самим собой». Автор сама отмечает, что научных доказательств нет. Здесь используется только поведенческая часть: что человек говорит, чего боится и как реагирует на обратную связь. Телосложение, внешность и медицинские утверждения книги")} <b>{tr("не используются и не рекомендуются")}</b>{tr(": определять особенности человека, тем более школьника, по телу ненаучно и ранит. Это гипотеза для настройки общения, не диагноз; ученику ярлык не называется.")}</p>
           </div>
           <div className="gridauto" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
             {WOUND_ORDER.map((w) => (
               <div key={w} className="panel" style={{ borderColor: `${WOUNDS[w].color}88` }}>
                 <h3>{WOUNDS[w].emoji} {WOUNDS[w].name}</h3>
-                <p className="small muted">Стратегия защиты: {WOUNDS[w].strategy}. {WOUNDS[w].theme}</p>
-                <h4>Чего боится</h4><p className="small">{WOUNDS[w].fear}</p>
-                <h4>Признаки в поведении</h4><List items={WOUNDS[w].signs} />
-                <h4>Что помогает</h4><List items={WOUNDS[w].works} />
-                <h4>Чего избегать</h4><List items={WOUNDS[w].avoids} />
+                <p className="small muted">{tr("Стратегия защиты:")} {WOUNDS[w].strategy}. {WOUNDS[w].theme}</p>
+                <h4>{tr("Чего боится")}</h4><p className="small">{WOUNDS[w].fear}</p>
+                <h4>{tr("Признаки в поведении")}</h4><List items={WOUNDS[w].signs} />
+                <h4>{tr("Что помогает")}</h4><List items={WOUNDS[w].works} />
+                <h4>{tr("Чего избегать")}</h4><List items={WOUNDS[w].avoids} />
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {tab === "Этика" && (
+      {tab === tr("Этика") && (
         <div className="stack">
-          <p className="muted small">Правила работы куратора со школьниками. Они действуют и в симуляторе, и в реальной практике.</p>
+          <p className="muted small">{tr("Правила работы куратора со школьниками. Они действуют и в симуляторе, и в реальной практике.")}</p>
           <div className="gridauto" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
             {ETHICS_RULES.map((r) => (
               <div key={r.title} className="panel"><h3>{r.icon} {r.title}</h3><p className="small muted" style={{ marginTop: 6 }}>{r.text}</p></div>
@@ -260,7 +261,7 @@ export default function Knowledge() {
         </div>
       )}
 
-      {tab === "Тон общения" && (
+      {tab === tr("Тон общения") && (
         <div className="stack">
           <div className="grid2">
             {TONES.map((t) => (
@@ -268,31 +269,31 @@ export default function Knowledge() {
             ))}
           </div>
           <div className="panel">
-            <h3>Лестница отношений</h3>
-            <p className="muted small" style={{ margin: "6px 0 10px" }}>Доверие растёт, когда тон попадает в ожидания ученика. Слишком тёплый тон для малознакомых воспринимается как давление, слишком холодный для близких как безразличие.</p>
-            {CLOSENESS.map((c) => <div key={c.name} className="perk" style={{ marginTop: 6 }}><span className="ic">{c.icon}</span><div><b>{c.name}</b> · от {c.from} доверия<div className="xs muted">{c.hint}</div></div></div>)}
+            <h3>{tr("Лестница отношений")}</h3>
+            <p className="muted small" style={{ margin: "6px 0 10px" }}>{tr("Доверие растёт, когда тон попадает в ожидания ученика. Слишком тёплый тон для малознакомых воспринимается как давление, слишком холодный для близких как безразличие.")}</p>
+            {CLOSENESS.map((c) => <div key={c.name} className="perk" style={{ marginTop: 6 }}><span className="ic">{c.icon}</span><div><b>{c.name}</b> {tr("· от {n} доверия", { n: c.from })}<div className="xs muted">{c.hint}</div></div></div>)}
           </div>
           <div className="panel">
-            <h3>Кому какой тон обычно нужен</h3>
-            <List items={["E и F: ближе к теплу, нужен живой контакт и признание", "I и T: сначала дистанция и уважение личных границ, теплота постепенно", "Приспосабливающийся и Естественный Ребёнок: нужна эмоциональная безопасность и тепло", "Взрослый и Критикующий Родитель: нейтральный, деловой тон, ясность", "С ростом доверия комфортная теплота растёт у всех"]} />
+            <h3>{tr("Кому какой тон обычно нужен")}</h3>
+            <List items={[tr("E и F: ближе к теплу, нужен живой контакт и признание"), tr("I и T: сначала дистанция и уважение личных границ, теплота постепенно"), tr("Приспосабливающийся и Естественный Ребёнок: нужна эмоциональная безопасность и тепло"), tr("Взрослый и Критикующий Родитель: нейтральный, деловой тон, ясность"), tr("С ростом доверия комфортная теплота растёт у всех")]} />
           </div>
         </div>
       )}
 
-      {tab === "Тактики" && (
+      {tab === tr("Тактики") && (
         <div className="gridauto">
           {(Object.keys(TACTICS) as Tactic[]).map((t) => (
             <div key={t} className="panel">
               <h3>{TACTICS[t].icon} {TACTICS[t].name}</h3>
-              <p className="xs muted" style={{ margin: "6px 0" }}>Лучше всего работает с:</p>
+              <p className="xs muted" style={{ margin: "6px 0" }}>{tr("Лучше всего работает с:")}</p>
               <div className="row wrap gap8">
                 {EGO_ORDER.filter((k) => EGO[k].tactic[t] >= 1).map((k) => <span key={k} className="pill">{EGO[k].emoji} {EGO[k].name}</span>)}
-                {EGO_ORDER.every((k) => EGO[k].tactic[t] < 1) && <span className="muted xs">зависит от ситуации и типа</span>}
+                {EGO_ORDER.every((k) => EGO[k].tactic[t] < 1) && <span className="muted xs">{tr("зависит от ситуации и типа")}</span>}
               </div>
-              <p className="xs muted" style={{ margin: "8px 0 4px" }}>Осторожно с:</p>
+              <p className="xs muted" style={{ margin: "8px 0 4px" }}>{tr("Осторожно с:")}</p>
               <div className="row wrap gap8">
                 {EGO_ORDER.filter((k) => EGO[k].tactic[t] <= -1).map((k) => <span key={k} className="pill">{EGO[k].emoji} {EGO[k].name}</span>)}
-                {EGO_ORDER.every((k) => EGO[k].tactic[t] > -1) && <span className="muted xs">почти ко всем применима</span>}
+                {EGO_ORDER.every((k) => EGO[k].tactic[t] > -1) && <span className="muted xs">{tr("почти ко всем применима")}</span>}
               </div>
             </div>
           ))}

@@ -5,6 +5,7 @@ import { bestTone, dominantEgo, preferredWarmth, topTactics, woundOf } from "./e
 import { WOUNDS } from "../data/wounds";
 import { TACTICS, TONES, fmt } from "./text";
 import type { CaseState, ReportInput, ReportResult, Student } from "./types";
+import { tr } from "../i18n";
 
 const PAIRS = ["EI", "SN", "TF", "JP"] as const;
 
@@ -33,30 +34,30 @@ export function evaluateReport(student: Student, c: CaseState, input: ReportInpu
 
   const info = EGO[ego];
   const expert: string[] = [];
-  if (egoCorrect) expert.push(`✅ Эго-состояние определено верно: ${info.name}.`);
-  else expert.push(`❌ Доминирует ${info.name} (вы указали ${input.ego ? EGO[input.ego].name : "ничего"}). Признаки: ${info.signs[0].toLowerCase()}.`);
-  if (lettersCorrect === 4) expert.push(`✅ Тип ${student.mbti} («${TYPES[student.mbti].nick}») определён точно.`);
-  else expert.push(`❌ Верный тип: ${student.mbti} («${TYPES[student.mbti].nick}»), угадано букв: ${lettersCorrect} из 4.`);
+  if (egoCorrect) expert.push(tr("✅ Эго-состояние определено верно: {v}.", { v: info.name }));
+  else expert.push(tr("❌ Доминирует {v} (вы указали {v2}). Признаки: {v3}.", { v: info.name, v2: input.ego ? EGO[input.ego].name : tr("ничего"), v3: info.signs[0].toLowerCase() }));
+  if (lettersCorrect === 4) expert.push(tr("✅ Тип {mbti} («{nick}») определён точно.", { mbti: student.mbti, nick: TYPES[student.mbti].nick }));
+  else expert.push(tr("❌ Верный тип: {mbti} («{nick}»), угадано букв: {lettersCorrect} из 4.", { mbti: student.mbti, nick: TYPES[student.mbti].nick, lettersCorrect }));
   expert.push(
     toneOk
-      ? `✅ Тон «${TONES[input.tone!].name}» подходит ученику.`
-      : `❌ Ученику лучше подходит тон «${TONES[best].name}». ${TONES[best].desc}.`,
+      ? tr("✅ Тон «{v}» подходит ученику.", { v: TONES[input.tone!].name })
+      : tr("❌ Ученику лучше подходит тон «{v}». {desc}.", { v: TONES[best].name, desc: TONES[best].desc }),
   );
   expert.push(
     tacticsHit === 2
-      ? `✅ Обе тактики выбраны верно.`
-      : `Лучше всего работают: ${top.map((t) => `${TACTICS[t].icon} ${TACTICS[t].name}`).join(" и ")}.`,
+      ? tr("✅ Обе тактики выбраны верно.")
+      : tr("Лучше всего работают: {list}.", { list: top.map((x) => `${TACTICS[x].icon} ${TACTICS[x].name}`).join(tr(" и ")) }),
   );
   expert.push(
     woundCorrect
-      ? `✅ Чувствительная тема определена верно: «${WOUNDS[wound].name}».`
+      ? tr("✅ Чувствительная тема определена верно: «{v}».", { v: WOUNDS[wound].name })
       : input.wound
-        ? `❌ Скорее всего, чувствительная тема «${WOUNDS[wound].name}» (вы указали «${WOUNDS[input.wound].name}»). Признаки: ${WOUNDS[wound].signs[0].toLowerCase()}.`
-        : `Чувствительная тема не указана. Вероятнее всего: «${WOUNDS[wound].name}». Что помогает: ${WOUNDS[wound].works[0].toLowerCase()}.`,
+        ? tr("❌ Скорее всего, чувствительная тема «{v}» (вы указали «{v2}»). Признаки: {v3}.", { v: WOUNDS[wound].name, v2: WOUNDS[input.wound].name, v3: WOUNDS[wound].signs[0].toLowerCase() })
+        : tr("Чувствительная тема не указана. Вероятнее всего: «{v}». Что помогает: {v2}.", { v: WOUNDS[wound].name, v2: WOUNDS[wound].works[0].toLowerCase() }),
   );
-  expert.push(`Как мотивировать: ${info.motivate[0].toLowerCase()}.`);
-  expert.push(`Что стоит говорить: ${info.say[0]}`);
-  if (TYPES[student.mbti].works[0]) expert.push(`Для типа ${student.mbti}: ${TYPES[student.mbti].works[0].toLowerCase()}.`);
+  expert.push(tr("Как мотивировать: {v}.", { v: info.motivate[0].toLowerCase() }));
+  expert.push(tr("Что стоит говорить: {say}", { say: info.say[0] }));
+  if (TYPES[student.mbti].works[0]) expert.push(tr("Для типа {mbti}: {v}.", { mbti: student.mbti, v: TYPES[student.mbti].works[0].toLowerCase() }));
 
   return {
     at,

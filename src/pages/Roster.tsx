@@ -5,6 +5,7 @@ import { CLOSENESS } from "../game/text";
 import { STAGES, closenessLevel, stageOf } from "../game/engine";
 import { useGame } from "../game/store";
 import type { Nav } from "../App";
+import { tr } from "../i18n";
 
 export default function Roster({ go }: { go: Nav }) {
   const { g, removeStudent } = useGame();
@@ -12,17 +13,17 @@ export default function Roster({ go }: { go: Nav }) {
     return (
       <div className="panel empty">
         <div className="big">🎒</div>
-        <h2>Пока нет учеников</h2>
-        <p className="muted" style={{ margin: "8px 0 18px" }}>Создайте ученика вручную или получите случайную группу.</p>
-        <button className="btn" onClick={() => go("studio")}>Создать ученика</button>
+        <h2>{tr("Пока нет учеников")}</h2>
+        <p className="muted" style={{ margin: "8px 0 18px" }}>{tr("Создайте ученика вручную или получите случайную группу.")}</p>
+        <button className="btn" onClick={() => go("studio")}>{tr("Создать ученика")}</button>
       </div>
     );
   }
   return (
     <div className="stack">
       <div className="row wrap" style={{ justifyContent: "space-between" }}>
-        <h2>Мои ученики</h2>
-        <button className="btn" onClick={() => go("studio")}>＋ Новый ученик</button>
+        <h2>{tr("Мои ученики")}</h2>
+        <button className="btn" onClick={() => go("studio")}>{tr("＋ Новый ученик")}</button>
       </div>
       <div className="gridauto">
         {g.students.map((s) => {
@@ -43,15 +44,15 @@ export default function Roster({ go }: { go: Nav }) {
                 </div>
               </div>
               <div className="row wrap gap8" style={{ margin: "12px 0 6px" }}>
-                <span className="pill">{reveal ? `${s.mbti} · ${TYPES[s.mbti].nick}` : "❓ Профиль скрыт"}</span>
-                <span className="pill">{c.finished ? "🏁 ЕНТ сдан" : `${st.icon} ${st.name} · нед. ${c.week}`}</span>
+                <span className="pill">{reveal ? `${s.mbti} · ${TYPES[s.mbti].nick}` : tr("❓ Профиль скрыт")}</span>
+                <span className="pill">{c.finished ? tr("🏁 ЕНТ сдан") : tr("{icon} {v} · нед. {week}", { icon: st.icon, v: st.name, week: c.week })}</span>
               </div>
-              <Bar label="Доверие" value={c.trust} color="#34d399" />
-              <p className="xs muted">{CLOSENESS[lvl].icon} Отношения: {CLOSENESS[lvl].name}{c.finalScore != null ? ` · ЕНТ: ${c.finalScore}` : ""}</p>
+              <Bar label={tr("Доверие")} value={c.trust} color="#34d399" />
+              <p className="xs muted">{CLOSENESS[lvl].icon} {tr("Отношения:")} {CLOSENESS[lvl].name}{c.finalScore != null ? tr(" · ЕНТ: {finalScore}", { finalScore: c.finalScore }) : ""}</p>
               <div className="row" style={{ marginTop: 10 }}>
-                <button className="btn sm grow" onClick={(e) => { e.stopPropagation(); go("case", s.id); }}>Открыть</button>
-                <button className="btn sm ghost" onClick={(e) => { e.stopPropagation(); go("report", s.id); }}>📝 Отчёт</button>
-                <button className="btn sm ghost" aria-label="Удалить" onClick={(e) => { e.stopPropagation(); if (confirm(`Удалить ученика ${s.name}?`)) removeStudent(s.id); }}>🗑</button>
+                <button className="btn sm grow" onClick={(e) => { e.stopPropagation(); go("case", s.id); }}>{tr("Открыть")}</button>
+                <button className="btn sm ghost" onClick={(e) => { e.stopPropagation(); go("report", s.id); }}>{tr("📝 Отчёт")}</button>
+                <button className="btn sm ghost" aria-label={tr("Удалить")} onClick={(e) => { e.stopPropagation(); if (confirm(tr("Удалить ученика {v}?", { v: s.name }))) removeStudent(s.id); }}>🗑</button>
               </div>
             </div>
           );
