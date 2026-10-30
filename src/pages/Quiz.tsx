@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { Avatar, Confetti, Ring, studentColor } from "../components/ui";
-import { phrasesOf } from "../data/phrases";
+import { phrasesOf, woundPhrasesOf } from "../data/phrases";
 import { woundOf } from "../game/engine";
 import { TACTICS, fmt } from "../game/text";
 import type { Student } from "../game/types";
-import { QUIZ_LENGTH, buildQuiz, hintFor, questionText } from "../quiz/quiz";
+import { QUIZ_LENGTH, analysisOf, buildQuiz, hintFor, questionText } from "../quiz/quiz";
 import { tr } from "../i18n";
 
 export default function Quiz({ student, again, fresh }: { student: Student; again: () => void; fresh: () => void }) {
@@ -15,9 +15,10 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   const [chosen, setChosen] = useState<number | null>(null);
   const color = studentColor(student, true);
   const phrases = phrasesOf(student.mbti);
+  const wPhrases = woundPhrasesOf(woundOf(student));
   /** The student's message, followed by a phrase typical for their type (not in a safety-critical situation). */
   const speech = (q: (typeof quiz)[number], n: number) =>
-    q.event.serious || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(phrases[(n + student.seed) % phrases.length], student)}.`;
+    q.event.serious || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 2 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
 
   const retry = () => { setAttempt((a) => a + 1); setI(0); setAnswers([]); setChosen(null); };
 
@@ -37,6 +38,10 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
             <button className="btn ghost" onClick={fresh}>{tr("Новый ученик")}</button>
           </div>
         </div>
+        <details className="card fold">
+          <summary>🔎 {tr("Разбор ученика")}</summary>
+          {analysisOf(student).map((l, n) => <p key={n} className="small" style={{ marginTop: 8 }}>{l}</p>)}
+        </details>
         {misses.map(({ q, k, a }) => (
           <div key={k} className="card hint">
             <div className="step-title">{k + 1}. {q.event.title}</div>

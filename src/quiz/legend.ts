@@ -7,7 +7,7 @@ import { fmt } from "../game/text";
 import type { Student } from "../game/types";
 import { LANG, tr } from "../i18n";
 import type { EgoKey } from "../game/types";
-import { phrasesOf } from "../data/phrases";
+import { phrasesOf, woundPhrasesOf } from "../data/phrases";
 import { EGO_ORIGINAL, TYPE_ORIGINAL } from "./original-kk";
 import { TYPE_PDF } from "./pdf-kk";
 
@@ -88,11 +88,16 @@ export function legendOf(s: Student): Legend {
         tr("Боится: {v}", { v: list(fears, 3) }),
         ...beliefs,
         tr("Привычные сценарии: {v}", { v: list(scenarios, 2) }),
+      ] },
+      { icon: w.emoji, head: tr("Чувствительная тема: {name}", { name: w.name }), lines: [
         w.theme,
         f(w.voice),
+        tr("Маска: {v}", { v: w.strategy }),
+        tr("Боится: {v}", { v: lower(w.fear).replace(/\.$/, "") }),
+        tr("В школе: {v}", { v: lower(w.school) }),
         tr("Как это проявляется: {v}", { v: list(w.signs, 3) }),
       ] },
-      { icon: "💬", head: tr("Любимые слова и фразы"), lines: phrasesOf(s.mbti).slice(0, 5).map((x) => `«${f(x)}»`) },
+      { icon: "💬", head: tr("Любимые слова и фразы"), lines: [...phrasesOf(s.mbti).slice(0, 4), ...woundPhrasesOf(woundOf(s)).slice(0, 3)].map((x) => `«${f(x)}»`) },
     ],
   };
 }

@@ -1,4 +1,5 @@
 import { LANG } from "../i18n";
+import { WOUNDS, type WoundKey } from "./wounds";
 
 /**
  * Words and phrases each type tends to use (Russian, Kazakh), tied to the type's drivers, fears and
@@ -27,3 +28,6 @@ const P: Record<string, [string, string][]> = {
 
 /** Phrases of the type in the current language. */
 export const phrasesOf = (mbti: string): string[] => (P[mbti] ?? []).map(([ru, kk]) => (LANG === "kk" ? kk : ru));
+
+/** Phrases tied to the student's sensitive theme in the current language. */
+export const woundPhrasesOf = (w: WoundKey): string[] => WOUNDS[w].phrases.map(([ru, kk]) => (LANG === "kk" ? kk : ru));

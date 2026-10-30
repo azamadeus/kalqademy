@@ -2,7 +2,8 @@ import { EVENTS, type GameEvent } from "../data/events";
 import { familyById } from "../data/world";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES } from "../data/mbti";
-import { dominantEgo, styleScore } from "../game/engine";
+import { dominantEgo, styleScore, woundOf } from "../game/engine";
+import { WOUNDS } from "../data/wounds";
 import { createStudent } from "../game/generate";
 import { TYPE_CODES } from "../data/mbti";
 import { mulberry32 } from "../game/rng";
@@ -120,6 +121,10 @@ export function hintFor(student: Student, q: Question, chosen: number, n = 0): s
     if (LANG === "kk" && TYPE_ORIGINAL[student.mbti].plus.length) lines.push(`${student.mbti}: ${pickOf(TYPE_ORIGINAL[student.mbti].plus, 0)}`);
     else lines.push(tr("Для типа {mbti} хорошо работает: {how}.", { mbti: student.mbti, how: pickOf(type.works, 0).toLowerCase() }));
   }
+  if (!q.event.serious) {
+    const w = WOUNDS[woundOf(student)];
+    lines.push(tr("Для темы «{name}» важно: {works}. Избегать: {avoids}.", { name: w.name, works: pickOf(w.works, 0).toLowerCase(), avoids: pickOf(w.avoids, 0).toLowerCase() }));
+  }
   const o = q.event.options[chosen];
   if (o.fit < 1) lines.push(tr("Для самой ситуации решение было слабым."));
   else lines.push(tr("Подход не совпал с тем, что нужно ученику ({v}, {mbti}).", { v: ego.name, mbti: student.mbti }));
@@ -127,3 +132,21 @@ export function hintFor(student: Student, q: Question, chosen: number, n = 0): s
 }
 
 export const questionText = (q: Question, s: Student) => fmt(q.event.text, s);
+
+/** A short cheat sheet on the student: what works and what to avoid, from type, egogram and sensitive theme. */
+export function analysisOf(student: Student): string[] {
+  const type = TYPES[student.mbti];
+  const ranked = EGO_ORDER.slice().sort((x, y) => student.ego[y] - student.ego[x]);
+  const top = ranked.slice(0, 2);
+  const low = ranked[ranked.length - 1];
+  const w = WOUNDS[woundOf(student)];
+  const kk = LANG === "kk";
+  const motivate = (k: (typeof EGO_ORDER)[number]) => (kk && EGO_ORIGINAL[k].motivate[0]) || EGO[k].motivate[0];
+  return [
+    tr("Тип: {v}", { v: `${student.mbti} «${type.nick}»` }),
+    tr("Эго-состояния: {v}", { v: `${top.map((k) => `${EGO[k].emoji} ${EGO[k].name} ${student.ego[k]}`).join(", ")}; ${EGO[low].emoji} ${EGO[low].name} ${student.ego[low]}` }),
+    tr("Чувствительная тема: {name}", { name: `${w.emoji} ${w.name}` }),
+    tr("Работает: {v}", { v: [type.works[0], motivate(top[0]), w.works[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
+    tr("Избегать: {v}", { v: [type.avoids[0], EGO[top[0]].avoid[0], w.avoids[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
+  ];
+}
