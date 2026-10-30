@@ -104,7 +104,7 @@ export default function PlanPage({ sid, go }: { sid: string | null; go: Nav }) {
                   <div className="row wrap gap8" style={{ margin: "8px 0" }}>
                     {list.map((iv) => (
                       <button key={iv.id} className={`choice ${picked.includes(iv.id) ? "on" : ""}`} style={{ padding: "6px 10px", fontSize: "0.85rem" }} onClick={() => toggleIv(st.id, iv.id)} title={iv.how}>
-                        {iv.title} <span className="xs muted">· №{iv.wb}</span>
+                        {iv.title} <span className="xs muted">· {iv.wb === 0 ? "прил." : `№${iv.wb}`}</span>
                       </button>
                     ))}
                   </div>

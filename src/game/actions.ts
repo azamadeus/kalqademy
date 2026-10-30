@@ -19,6 +19,7 @@ import {
 import { familyById } from "../data/world";
 import { clamp, hashStr, mulberry32, pick } from "./rng";
 import { evaluateReport } from "./report";
+import { ivSource } from "../data/workbooks";
 import { evaluatePlan, planBonusFor, planCovers } from "./plan";
 import { TACTICS, fmt, toneWrap } from "./text";
 import type {
@@ -178,7 +179,7 @@ export function act(g: GameState, studentId: string, optionIndex: number, tone: 
   if (s.intrusive) reply += " " + INTRUSIVE;
   else if (s.tooCold) reply += " " + TOO_COLD;
   const why = whyLines(student, s, option.tactic, tone, student.blind);
-  if (iv && planBonus > 0) why.push(`📋 План сработал: заранее подготовлен приём «${iv.title}» (воркбук №${iv.wb}).`);
+  if (iv && planBonus > 0) why.push(`📋 План сработал: заранее подготовлен приём «${iv.title}» (${ivSource(iv)}).`);
   c = push(c, "curator", toneWrap(tone, fmt(option.text, student)), tone);
   c = push(c, "student", reply);
   c = {

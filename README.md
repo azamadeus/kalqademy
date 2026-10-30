@@ -37,6 +37,7 @@ npm test
 - `src/game/engine.ts` — расчёт эффекта хода, тон, отношения, выбор событий
 - `src/game/actions.ts` — переходы состояния (неделя, вопрос, отчёт)
 - `src/game/report.ts`, `plan.ts`, `career.ts` — отчёты, планы развития и развитие куратора
+- `src/data/exercises.ts` — 49 действий из приложения ALQA против «удобного» состояния (оригинал в `public/materials/exercises-kk.txt`)
 - `src/data/workbooks.ts` — темы воркбуков ALQA (пока №1–12, кроме №13) и приёмы для плана; новые темы добавляются сюда, а исходный текст кладётся в `public/materials/workbooks.json`
 - `src/pages`, `src/components` — интерфейс
 - `public/materials` — извлечённый текст исходных файлов ALQA (docx и слайды)

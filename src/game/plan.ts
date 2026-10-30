@@ -1,6 +1,6 @@
 import { EGO, EGO_ORDER } from "../data/ego";
 import { EVENTS } from "../data/events";
-import { INTERVENTIONS, interventionById, type Intervention } from "../data/workbooks";
+import { INTERVENTIONS, interventionById, ivSource, type Intervention } from "../data/workbooks";
 import { PROBLEMS, familyById } from "../data/world";
 import { bestTone, dominantEgo, preferredWarmth, STAGES } from "./engine";
 import { TONES } from "./text";
@@ -147,7 +147,7 @@ export function evaluatePlan(student: Student, c: CaseState, plan: Plan, at: num
   if (!chosen.length) expert.push("❌ В плане нет ни одного приёма из воркбуков.");
   else expert.push(`${fit >= 0.65 ? "✅" : fit >= 0.4 ? "⚠️" : "❌"} Подходящесть приёмов этому ученику: ${parts.fit}%.`);
   const weak = chosen.filter((x) => interventionFit(student, x.iv, x.stage) < 0.4);
-  if (weak.length) expert.push(`Слабее всего подходят: ${weak.slice(0, 3).map((x) => `«${x.iv.title}» (воркбук №${x.iv.wb})`).join(", ")}.`);
+  if (weak.length) expert.push(`Слабее всего подходят: ${weak.slice(0, 3).map((x) => `«${x.iv.title}» (${ivSource(x.iv)})`).join(", ")}.`);
   const missing = STAGES.filter((s) => !plan.steps[s.id].interventionIds.length).map((s) => s.name);
   if (missing.length) expert.push(`⚠️ Не заполнены этапы: ${missing.join(", ")}.`);
   if (plan.metrics.trim().length < 20) expert.push("⚠️ Опишите метрики успеха: что именно будет считаться прогрессом (баллы пробников, режим, стресс).");
@@ -164,7 +164,7 @@ export function evaluatePlan(student: Student, c: CaseState, plan: Plan, at: num
     .map((iv) => ({ iv, f: interventionFit(student, iv) }))
     .sort((a, b) => b.f - a.f)
     .slice(0, 3);
-  expert.push(`Что стоило бы добавить: ${recs.map((r) => `«${r.iv.title}» (воркбук №${r.iv.wb})`).join(", ")}.`);
+  expert.push(`Что стоило бы добавить: ${recs.map((r) => `«${r.iv.title}» (${ivSource(r.iv)})`).join(", ")}.`);
   if (reveal) expert.push(`Ориентир ALQA для «${egoInfo.name}»: ${egoInfo.motivate[0].toLowerCase()}.`);
 
   const band = score >= 70 ? "high" : score >= 40 ? "mid" : "low";

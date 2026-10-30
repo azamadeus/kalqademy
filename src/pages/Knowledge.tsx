@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { GROUPS, TYPES, TYPE_CODES } from "../data/mbti";
+import { EXERCISES, EX_GROUPS, type ExGroup } from "../data/exercises";
 import { INTERVENTIONS, WORKBOOKS } from "../data/workbooks";
 import { CLOSENESS, TACTICS, TONES } from "../game/text";
 import type { EgoKey, Tactic } from "../game/types";
@@ -87,6 +88,13 @@ function EgoModal({ k, onClose }: { k: EgoKey; onClose: () => void }) {
         </div>
       </div>
       <p className="small muted" style={{ margin: "8px 0" }}>{e.low}</p>
+      {k === "adapted_child" && (
+        <details>
+          <summary>🧰 Действия, снижающие «удобное» состояние (приложение ALQA, 49)</summary>
+          <p className="xs muted" style={{ marginTop: 6 }}>Полный список с группами во вкладке «Упражнения».</p>
+          <ul className="list">{EXERCISES.slice(0, 12).map((x) => <li key={x.n}><b>{x.title}.</b> {x.how}</li>)}</ul>
+        </details>
+      )}
       <Original sections={docx?.egoStates?.[k]} />
     </Modal>
   );
@@ -112,9 +120,41 @@ function TypeModal({ code, onClose }: { code: string; onClose: () => void }) {
   );
 }
 
-const TABS = ["Эго-состояния", "Типы MBTI", "Воркбуки", "Тон общения", "Тактики"] as const;
+const TABS = ["Эго-состояния", "Типы MBTI", "Воркбуки", "Упражнения", "Тон общения", "Тактики"] as const;
 
 interface Wb { topics: { num: number; title: string; pages: string[] }[] }
+
+function ExercisesTab() {
+  const [g, setG] = useState<ExGroup | "all">("all");
+  const [raw, setRaw] = useState<string | null>(null);
+  const load = () => fetch(`${BASE}materials/exercises-kk.txt`).then((r) => r.text()).then(setRaw).catch(() => setRaw(""));
+  const list = EXERCISES.filter((x) => g === "all" || x.group === g);
+  return (
+    <div className="stack">
+      <div className="panel">
+        <h3>Действия, снижающие состояние «ыңғайлы» (удобного Приспосабливающегося Ребёнка)</h3>
+        <p className="muted small" style={{ marginTop: 6 }}>49 упражнений из приложения ALQA. Они помогают ученикам и кураторам с сильным Приспосабливающимся Ребёнком: учат слышать свои желания, ошибаться, говорить «нет» и заботиться о себе. Часть из них используется как приёмы в плане развития.</p>
+        <div className="row wrap gap8" style={{ marginTop: 10 }}>
+          <button className={`btn sm ${g === "all" ? "" : "ghost"}`} onClick={() => setG("all")}>Все · 49</button>
+          {(Object.keys(EX_GROUPS) as ExGroup[]).map((k) => <button key={k} className={`btn sm ${g === k ? "" : "ghost"}`} onClick={() => setG(k)}>{EX_GROUPS[k].icon} {EX_GROUPS[k].name}</button>)}
+        </div>
+      </div>
+      <div className="gridauto">
+        {list.map((x) => (
+          <div key={x.n} className="panel">
+            <span className="pill">{EX_GROUPS[x.group].icon} №{x.n}</span>
+            <h4 style={{ margin: "8px 0 4px" }}>{x.title}</h4>
+            <p className="small muted">{x.how}</p>
+          </div>
+        ))}
+      </div>
+      <details onToggle={(e) => (e.currentTarget as HTMLDetailsElement).open && raw === null && load()}>
+        <summary>📄 Оригинал на казахском (49 пунктов)</summary>
+        <div className="src">{raw ?? "Загрузка…"}</div>
+      </details>
+    </div>
+  );
+}
 
 export default function Knowledge() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Эго-состояния");
@@ -184,6 +224,8 @@ export default function Knowledge() {
           <p className="xs muted">Загружено 12 из 13 воркбуков (№1–12). Оригиналы на казахском сохранены для №1–4 и 9–12; для №5–8 материалы пришли текстом, оригинал в базу не включён.</p>
         </div>
       )}
+
+      {tab === "Упражнения" && <ExercisesTab />}
 
       {tab === "Тон общения" && (
         <div className="stack">

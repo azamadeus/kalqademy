@@ -4,6 +4,8 @@ import { EVENTS } from "../data/events";
 import { QUESTIONS } from "../data/questions";
 import { TYPE_CODES, TYPES, groupOf } from "../data/mbti";
 import { COURSES, FAMILIES, GOALS } from "../data/world";
+import { EXERCISES } from "../data/exercises";
+import { INTERVENTIONS } from "../data/workbooks";
 import { act, addStudent, advance, newGame, setHypothesis, submitReport } from "./actions";
 import { bestTone, dominantEgo, stageOf } from "./engine";
 import { createStudent } from "./generate";
@@ -37,6 +39,20 @@ describe("content integrity", () => {
         expect(fmt(q.text, s)).not.toMatch(/[{}]/);
         expect(fmt(q.answer(s), s), q.id).not.toMatch(/[{}]/);
       }
+    }
+  });
+});
+
+describe("workbook content", () => {
+  it("has 49 handout exercises covering every number once", () => {
+    expect(EXERCISES.map((x) => x.n)).toEqual(Array.from({ length: 49 }, (_, i) => i + 1));
+  });
+  it("has unique intervention ids with valid references", () => {
+    expect(new Set(INTERVENTIONS.map((i) => i.id)).size).toBe(INTERVENTIONS.length);
+    for (const i of INTERVENTIONS) {
+      expect(i.problems.length, i.id).toBeGreaterThan(0);
+      expect(i.egos.length, i.id).toBeGreaterThan(0);
+      expect(i.stages.length, i.id).toBeGreaterThan(0);
     }
   });
 });
