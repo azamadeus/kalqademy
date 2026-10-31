@@ -355,3 +355,24 @@ body { background: var(--bg); }
 .lrow { display: flex; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--panel2); }
 .lrow b { width: 24px; text-align: center; }
 @media (max-width: 640px) { .live-opts { grid-template-columns: 1fr; } }
+
+/* group practice */
+.group .gline { font-size: 1.12rem; line-height: 1.55; margin-top: 6px; }
+.group .gq { font-size: 1.3rem; font-weight: 600; }
+.group .gdisc { margin: 12px 0 0 20px; font-size: 1.08rem; line-height: 1.6; }
+.group .gego { display: grid; gap: 6px; margin: 14px auto 0; max-width: 460px; }
+.group .gsec { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.group .gsit { border-color: var(--accent); }
+.group .greveal { background: var(--panel2); }
+.group.gbig .gline { font-size: 1.6rem; }
+.group.gbig .gq { font-size: 1.9rem; }
+.group.gbig .gdisc { font-size: 1.5rem; }
+.group.gbig .step-title { font-size: 1rem; }
+.print-only { display: none; }
+@media print {
+  .noprint, .nav { display: none !important; }
+  .print-only { display: block; }
+  .pbreak { break-after: page; padding: 6px; }
+  body, .app { background: #fff !important; color: #000 !important; }
+  .card { border: 1px solid #999 !important; break-inside: avoid; }
+}

@@ -3,7 +3,7 @@ import { Avatar, studentColor } from "../components/ui";
 import { createStudent } from "../game/generate";
 import { tr } from "../i18n";
 
-export default function Home({ random, build, live }: { random: () => void; build: () => void; live: () => void }) {
+export default function Home({ random, build, live, group }: { random: () => void; build: () => void; live: () => void; group: () => void }) {
   const heroes = useMemo(() => [11, 37, 62].map((s) => createStudent({ seed: s, blind: false })), []);
   return (
     <div className="home">
@@ -16,6 +16,7 @@ export default function Home({ random, build, live }: { random: () => void; buil
         <button className="btn lg" onClick={random}>{tr("🎲 Случайный ученик")}</button>
         <button className="btn lg ghost" onClick={build}>{tr("Собрать ученика")}</button>
         <button className="btn lg ghost" onClick={live}>{tr("🎮 Живая игра")}</button>
+        <button className="btn lg ghost" onClick={group}>{tr("👥 Групповая практика")}</button>
       </div>
       <p className="xs muted" style={{ maxWidth: 520, margin: "28px auto 0" }}>
         {tr("Типы MBTI, эго-состояния и «чувствительные темы» это модели-гипотезы для тренировки общения, а не диагноз.")}
