@@ -11,6 +11,15 @@ import { tr } from "../i18n";
 const SKIN = ["#f5d0b5", "#e8b98f", "#d39b6e", "#b9784c", "#8d5a3a"];
 const HAIR = ["#2b2118", "#4a3222", "#7a4a2a", "#1a1a24", "#a0522d", "#c9a06a"];
 
+/** Body language of the cartoon avatar per sensitive theme: head position, shoulders and arms. Posture only, never body shape. */
+const THEME_POSE: Record<WoundKey, { head: string; body: string; arms: "none" | "cross" | "clasp" }> = {
+  rejection: { head: "translate(-3 3) rotate(-4 60 60)", body: "M24 125 Q28 94 60 91 Q92 94 96 125 Z", arms: "none" },
+  abandonment: { head: "translate(-1.2 -1.2) scale(1.02)", body: "M14 125 Q18 90 60 88 Q102 90 106 125 Z", arms: "clasp" },
+  humiliation: { head: "translate(0 8) rotate(3 60 60)", body: "M14 125 Q20 98 60 96 Q100 98 106 125 Z", arms: "none" },
+  betrayal: { head: "translate(0 -2) rotate(-3 60 60)", body: "M14 125 Q18 90 60 88 Q102 90 106 125 Z", arms: "cross" },
+  injustice: { head: "", body: "M12 125 L16 92 Q60 86 104 92 L108 125 Z", arms: "none" },
+};
+
 const THEME_FACE: Record<WoundKey, { gx: number; gy: number; inner: number; pupil: number; mouth: number; blush: boolean }> = {
   rejection: { gx: -1.5, gy: 1.5, inner: -3, pupil: 3.2, mouth: -3, blush: false },
   abandonment: { gx: 0, gy: -1, inner: -4, pupil: 3.9, mouth: -2, blush: false },
@@ -30,6 +39,7 @@ export function Avatar({
   // Expression only: the sensitive theme changes gaze, brows and mouth of the cartoon face, never the body.
   const T = theme ? THEME_FACE[theme] : { gx: 0, gy: 0, inner: 0, pupil: 3.2, mouth: 0, blush: false };
   const smile = 70 + (m - 0.5) * 20 + T.mouth;
+  const P = theme ? THEME_POSE[theme] : { head: "", body: "M14 125 Q18 90 60 88 Q102 90 106 125 Z", arms: "none" as const };
   const id = `g${look.skin}${look.hair}${look.hairColor}${look.accessory}${c.slice(1)}`;
   const style = gender === "f" ? [1, 5, 2, 3, 1, 5][look.hair % 6] : [0, 4, 0, 4, 3, 0][look.hair % 6];
   return (
@@ -44,7 +54,8 @@ export function Avatar({
       <circle cx="60" cy="60" r="58" fill={`url(#${id})`} />
       <g clipPath={`url(#c${id})`}>
         {(style === 1 || style === 5) && <path d="M32 58 Q28 20 60 20 Q92 20 88 58 L92 100 L72 100 L72 72 L48 72 L48 100 L28 100 Z" fill={hair} />}
-        <path d="M14 125 Q18 90 60 88 Q102 90 106 125 Z" fill={c} style={{ filter: "brightness(0.65)" }} />
+        <path d={P.body} fill={c} style={{ filter: "brightness(0.65)" }} />
+        <g transform={P.head || undefined}>
         <rect x="51" y="70" width="18" height="20" rx="6" fill={skin} />
         <ellipse cx="36.5" cy="58" rx="4" ry="6" fill={skin} />
         <ellipse cx="83.5" cy="58" rx="4" ry="6" fill={skin} />
@@ -64,6 +75,9 @@ export function Avatar({
         {look.accessory === 1 && <g stroke="#1f2937" strokeWidth="2" fill="rgba(255,255,255,0.12)"><circle cx="50" cy="56" r="8" /><circle cx="70" cy="56" r="8" /><path d="M58 56 H62" /></g>}
         {look.accessory === 2 && <g fill="#1f2937"><path d="M34 56 Q34 24 60 24 Q86 24 86 56" fill="none" stroke="#1f2937" strokeWidth="4" /><rect x="29" y="52" width="9" height="16" rx="4" /><rect x="82" y="52" width="9" height="16" rx="4" /></g>}
         {look.accessory === 3 && <circle cx="37" cy="64" r="2.6" fill="#fbbf24" />}
+        </g>
+        {P.arms === "cross" && <><path d="M26 112 Q60 98 94 108" stroke={skin} strokeWidth="9" strokeLinecap="round" fill="none" /><path d="M94 114 Q60 100 26 106" stroke={skin} strokeWidth="9" strokeLinecap="round" fill="none" opacity="0.92" /></>}
+        {P.arms === "clasp" && <><circle cx="54" cy="102" r="5.5" fill={skin} /><circle cx="66" cy="102" r="5.5" fill={skin} /><path d="M50 104 L70 104" stroke="#00000030" strokeWidth="1.5" /></>}
       </g>
       <circle cx="60" cy="60" r="57" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
       {mark && <text x="95" y="24" fontSize="26" textAnchor="middle">{mark}</text>}

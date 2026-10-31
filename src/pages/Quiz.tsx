@@ -5,7 +5,7 @@ import { driverSays } from "../quiz/legend";
 import { woundOf } from "../game/engine";
 import { TACTICS, fmt } from "../game/text";
 import type { Student } from "../game/types";
-import { QUIZ_LENGTH, analysisOf, buildQuiz, hintFor, questionText } from "../quiz/quiz";
+import { QUIZ_LENGTH, analysisOf, buildQuiz, hintFor, isTheme, isVoice, questionText } from "../quiz/quiz";
 import { tr } from "../i18n";
 
 export default function Quiz({ student, again, fresh }: { student: Student; again: () => void; fresh: () => void }) {
@@ -15,13 +15,13 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   const [answers, setAnswers] = useState<number[]>([]);
   const [chosen, setChosen] = useState<number | null>(null);
   const color = studentColor(student, true);
-  const icon = (q: (typeof quiz)[number], o: number) => (q.event.id.startsWith("voice") ? "" : `${TACTICS[q.event.options[o].tactic].icon} `);
+  const icon = (q: (typeof quiz)[number], o: number) => (isVoice(q) || isTheme(q) ? "" : `${TACTICS[q.event.options[o].tactic].icon} `);
   const phrases = phrasesOf(student.mbti);
   const wPhrases = woundPhrasesOf(woundOf(student));
   const dPhrases = driverSays(student.mbti);
   /** The student's message, followed by a phrase typical for their type (not in a safety-critical situation). */
   const speech = (q: (typeof quiz)[number], n: number) =>
-    q.event.serious || q.event.id.startsWith("voice") || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 3 === 1 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : n % 3 === 2 && dPhrases.length ? dPhrases[(n + student.seed) % dPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
+    q.event.serious || isVoice(q) || isTheme(q) || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 3 === 1 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : n % 3 === 2 && dPhrases.length ? dPhrases[(n + student.seed) % dPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
 
   const retry = () => { setAttempt((a) => a + 1); setI(0); setAnswers([]); setChosen(null); };
 
@@ -75,7 +75,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
           <div className="thin"><i style={{ width: `${((i + (answered ? 1 : 0)) / quiz.length) * 100}%` }} /></div>
         </div>
       </header>
-      <section className="chat"><div className="chat-log"><div className="msg system">{q.event.title}</div><div className="msg student">{speech(q, i)}</div></div></section>
+      <section className="chat"><div className="chat-log" style={isTheme(q) ? { maxHeight: "none" } : undefined}><div className="msg system">{q.event.title}</div>{isTheme(q) && <div style={{ display: "grid", placeItems: "center", padding: "6px 0" }}><Avatar look={student.look} gender={student.gender} size={180} color={color} mood={0.5} stress={0.35} theme={woundOf(student)} /></div>}<div className="msg student" style={isTheme(q) ? { maxWidth: "100%" } : undefined}>{speech(q, i)}</div></div></section>
       <section className="card stack" style={{ gap: 12 }}>
         <div className="step-title">{tr("Ваш ответ")}</div>
         <div className="opts">
@@ -83,7 +83,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
             const state = !answered ? "" : n === chosen ? (q.right.includes(n) ? "ok" : "no") : "";
             return (
               <button key={n} className={`opt ${state}`} disabled={answered && n !== chosen} onClick={() => pick(n)}>
-                {!q.event.id.startsWith("voice") && <span className="tag">{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}</span>}
+                {!isVoice(q) && !isTheme(q) && <span className="tag">{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}</span>}
                 <div>{fmt(o.text, student)}</div>
               </button>
             );

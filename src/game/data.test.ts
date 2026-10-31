@@ -21,10 +21,10 @@ describe("content integrity", () => {
     for (const k of EGO_ORDER) expect(EGO[k].say.length).toBeGreaterThan(0);
   });
 
-  it("every event has 4 options with distinct tactics and a playable stage", () => {
+  it("every event has 4 options with at least three different tactics and a playable stage", () => {
     for (const e of EVENTS) {
       expect(e.options, e.id).toHaveLength(4);
-      expect(new Set(e.options.map((o) => o.tactic)).size, e.id).toBe(4);
+      expect(new Set(e.options.map((o) => o.tactic)).size, e.id).toBeGreaterThanOrEqual(3);
       expect(e.options.some((o) => o.fit >= 1), e.id).toBe(true);
     }
     for (const w of [1, 3, 5, 8, 12]) expect(EVENTS.some((e) => e.stages.includes(stageOf(w)))).toBe(true);

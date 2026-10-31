@@ -3,7 +3,8 @@ import { familyById } from "../data/world";
 import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES } from "../data/mbti";
 import { dominantEgo, woundOf } from "../game/engine";
-import { WOUNDS } from "../data/wounds";
+import { WOUNDS, WOUND_ORDER } from "../data/wounds";
+import { woundPhrasesOf } from "../data/phrases";
 import { BANS, DRIVERS, driversOf, pick } from "../data/drivers";
 import { mulberry32 } from "../game/rng";
 import { fmt } from "../game/text";
@@ -16,7 +17,9 @@ import { TAGS } from "./tags";
 
 export const QUIZ_LENGTH = 10;
 /** How many of the questions are the student's own words (their fears and beliefs) rather than a prepared situation. */
-const VOICE_QUESTIONS = 4;
+const VOICE_QUESTIONS = 3;
+/** Questions where the learner names the sensitive theme from body language and behaviour. */
+const THEME_QUESTIONS = 2;
 /** Options within this many points of the best one count as equally right. */
 const TIE = 0.3;
 /** A question is only used when the best option leads the runner-up by at least this much. */
@@ -31,6 +34,9 @@ export interface Question {
   /** Indices of options that count as correct. */
   right: number[];
 }
+
+export const isTheme = (q: Question) => q.event.id.startsWith("theme-");
+export const isVoice = (q: Question) => q.event.id.startsWith("voice-");
 
 const cache = new WeakMap<Student, { needs: Need[]; v: Partial<Record<Feat, number>> }>();
 function profileOf(s: Student) {
@@ -88,12 +94,28 @@ function voiceQuestion(student: Student, line: string, n: number, rng: () => num
   return right && right.length === 1 ? { event, tags, right } : null;
 }
 
+/** "Which sensitive theme is it?": the learner reads body language and behaviour and chooses. */
+function themeQuestion(student: Student, n: number, rng: () => number): Question {
+  const right = woundOf(student);
+  const w = WOUNDS[right];
+  const others = WOUND_ORDER.filter((k) => k !== right).sort(() => rng() - 0.5).slice(0, 3);
+  const order = [right, ...others].sort(() => rng() - 0.5);
+  const says = woundPhrasesOf(right);
+  const cues = [
+    tr("Что видно: {v}", { v: w.pose[LANG === "kk" ? 1 : 0] }),
+    n === 0 ? tr("Говорит: «{v}»", { v: fmt(says[0], student) }) : tr("Ведёт себя так: {v}", { v: w.school.charAt(0).toLowerCase() + w.school.slice(1) }),
+  ].join("\n");
+  const options = order.map((k) => ({ tactic: "listen" as Tactic, text: `${WOUNDS[k].emoji} ${WOUNDS[k].name}`, fit: 0 }));
+  const event: GameEvent = { id: `theme-${n}`, title: tr("Какая у него чувствительная тема?"), problem: "social", stages: [], text: cues, stress: 0, options };
+  return { event, tags: options.map(() => []), right: [order.indexOf(right)] };
+}
+
 /** A fixed set of situations for the student: the same student and attempt always give the same quiz. */
 export function buildQuiz(student: Student, attempt = 0): Question[] {
   const rng = mulberry32(student.seed * 31 + attempt * 7 + 3);
   const ego = dominantEgo(student);
   const rank = (e: GameEvent) =>
-    (e.prone?.ego?.includes(ego) ? 0 : 1) + (e.prone?.letters?.some((l) => student.mbti.includes(l)) ? 0 : 1) + (familyById(student.familyId).boosts.includes(e.problem) ? 0 : 1) + rng() * 1.6;
+    (e.prone?.ego?.includes(ego) ? 0 : 1) + (e.prone?.letters?.some((l) => student.mbti.includes(l)) ? 0 : 1) + (familyById(student.familyId).boosts.includes(e.problem) ? 0 : 1) + (e.sharp ? -1.6 : 0) + rng() * 1.6;
   const pool = EVENTS.filter((e) => e.id !== "first-message" && TAGS[e.id])
     .map((e) => ({ e, r: rank(e) }))
     .sort((a, b) => a.r - b.r)
@@ -102,7 +124,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
   const problems = new Set<string>();
   let serious = 0;
   const used: Record<string, number> = {};
-  const want = QUIZ_LENGTH - VOICE_QUESTIONS;
+  const want = QUIZ_LENGTH - VOICE_QUESTIONS - THEME_QUESTIONS;
   const first = EVENTS.find((e) => e.id === "first-message")!;
   const firstRight = rightOptions(student, first, TAGS[first.id]);
   if (firstRight && firstRight.length === 1) { events.push({ event: first, tags: TAGS[first.id], right: firstRight }); used[first.options[firstRight[0]].tactic] = 1; }
@@ -113,7 +135,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
       if (strict && problems.has(e.problem)) continue;
       if (e.serious && serious >= 1) continue;
       const right = rightOptions(student, e, TAGS[e.id]);
-      if (!right || right.length > 1) continue;
+      if (!right || (right.length > 1 && !e.serious)) continue;
       const tac = e.options[right[0]].tactic;
       if (strict && (used[tac] ?? 0) >= TACTIC_CAP) continue;
       used[tac] = (used[tac] ?? 0) + 1;
@@ -124,11 +146,11 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
   }
   const voices: Question[] = [];
   const lines = voiceLines(student);
-  for (let n = 0; n < lines.length * 2 && voices.length < QUIZ_LENGTH - events.length; n++) {
+  for (let n = 0; n < lines.length * 2 && voices.length < VOICE_QUESTIONS + (want - events.length); n++) {
     const q = voiceQuestion(student, lines[n % lines.length], n, rng);
     if (q && !voices.some((x) => x.event.text === q.event.text)) voices.push(q);
   }
-  // events first, with the student's own words woven in between
+  // events first, with the student's own words woven in between and two theme questions near the end
   const out: Question[] = [];
   let vi = 0;
   events.forEach((q, i) => {
@@ -136,6 +158,8 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
     if (i % 2 === 1 && vi < voices.length) out.push(voices[vi++]);
   });
   while (vi < voices.length) out.push(voices[vi++]);
+  out.splice(Math.min(out.length, 4), 0, themeQuestion(student, 0, rng));
+  out.push(themeQuestion(student, 1, rng));
   return out;
 }
 
@@ -148,6 +172,13 @@ function evidence(student: Student, f: Feat, sign: 1 | -1): Need | undefined {
 /** Why the right answer was right and what was off in the chosen one, with the statements from the materials behind it. */
 export function hintFor(student: Student, q: Question, chosen: number, n = 0): string[] {
   const lines: string[] = [];
+  if (isTheme(q)) {
+    const w = WOUNDS[woundOf(student)];
+    lines.push(tr("Это тема «{name}»: {v}.", { name: w.name, v: w.signs.slice(0, 3).join("; ").toLowerCase() }));
+    lines.push(tr("Язык тела: {v}", { v: w.pose[LANG === "kk" ? 1 : 0] }));
+    lines.push(tr("Работает: {v}", { v: w.works.slice(0, 2).join("; ").toLowerCase() }));
+    return lines;
+  }
   if (q.event.serious) {
     lines.push(tr("⚠️ В реальной ситуации с такими словами: выслушать, не обещать тайну и сразу привлечь школьного психолога и ответственных взрослых."));
     return lines;
@@ -191,6 +222,7 @@ export function analysisOf(student: Student): string[] {
     tr("Тип: {v}", { v: `${student.mbti} «${type.nick}»` }),
     tr("Эго-состояния: {v}", { v: `${top.map((k) => `${EGO[k].emoji} ${EGO[k].name} ${student.ego[k]}`).join(", ")}; ${EGO[low].emoji} ${EGO[low].name} ${student.ego[low]}` }),
     tr("Чувствительная тема: {name}", { name: `${w.emoji} ${w.name}` }),
+    tr("Язык тела: {v}", { v: w.pose[kk ? 1 : 0] }),
     tr("Драйверы: {v}", { v: driversOf(student.mbti).drivers.map((d) => pick(DRIVERS[d].name)).join(", ") }),
     tr("Запреты: {v}", { v: driversOf(student.mbti).bans.map((b) => pick(BANS[b])).join("; ") }),
     tr("Работает: {v}", { v: [type.works[0], motivate(top[0]), w.works[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),

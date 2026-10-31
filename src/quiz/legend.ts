@@ -1,13 +1,12 @@
 import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPES } from "../data/mbti";
 import { courseById, familyById, goalById } from "../data/world";
-import { WOUNDS } from "../data/wounds";
-import { dominantEgo, woundOf } from "../game/engine";
+import { dominantEgo } from "../game/engine";
 import { fmt } from "../game/text";
 import type { Student } from "../game/types";
 import { LANG, tr } from "../i18n";
 import type { EgoKey } from "../game/types";
-import { phrasesOf, woundPhrasesOf } from "../data/phrases";
+import { phrasesOf } from "../data/phrases";
 import { BANS, DRIVERS, driversOf, pick } from "../data/drivers";
 import { EGO_ORIGINAL, TYPE_ORIGINAL } from "./original-kk";
 import { TYPE_PDF } from "./pdf-kk";
@@ -33,7 +32,6 @@ export function legendOf(s: Student): Legend {
   const t = TYPES[s.mbti];
   const dom = dominantEgo(s);
   const ego = EGO[dom];
-  const w = WOUNDS[woundOf(s)];
   const goal = goalById(s.goalId);
   const fam = familyById(s.familyId);
   const course = courseById(s.courseId);
@@ -100,15 +98,8 @@ export function legendOf(s: Student): Legend {
         ...driversOf(s.mbti).drivers.map((d, i) => `${i === 0 ? "★ " : ""}${pick(DRIVERS[d].name)}: ${pick(DRIVERS[d].shows)}. «${f(pick(DRIVERS[d].says[0]))}»`),
         tr("Запреты: {v}", { v: driversOf(s.mbti).bans.map((b) => pick(BANS[b])).join("; ") }),
       ] },
-      { icon: w.emoji, head: tr("Чувствительная тема: {name}", { name: w.name }), lines: [
-        w.theme,
-        f(w.voice),
-        tr("Маска: {v}", { v: w.strategy }),
-        tr("Боится: {v}", { v: lower(w.fear).replace(/\.$/, "") }),
-        tr("В школе: {v}", { v: lower(w.school) }),
-        tr("Как это проявляется: {v}", { v: list(w.signs, 3) }),
-      ] },
-      { icon: "💬", head: tr("Любимые слова и фразы"), lines: [...phrasesOf(s.mbti).slice(0, 3), ...driverSays(s.mbti).slice(0, 2), ...woundPhrasesOf(woundOf(s)).slice(0, 2)].map((x) => `«${f(x)}»`) },
+      { icon: "🔍", head: tr("Чувствительная тема"), lines: [tr("Определите её по языку тела и поведению: поза, взгляд, голос и то, что он говорит. Ответ будет в конце.")] },
+      { icon: "💬", head: tr("Любимые слова и фразы"), lines: [...phrasesOf(s.mbti).slice(0, 3), ...driverSays(s.mbti).slice(0, 2)].map((x) => `«${f(x)}»`) },
     ],
   };
 }

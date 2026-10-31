@@ -62,6 +62,22 @@ const T: Record<string, string[]> = {
   documents: ["sng", "ws", "lw", "X"],
   eve: ["lwq", "sn", "m", "X"],
   "last-week": ["sg", "ea", "la", "pn"],
+  "manip-lie": ["hqw", "V", "X", "lw"],
+  "quit-threat": ["rlc", "X", "sqc", "mX"],
+  "curator-blame": ["lhc", "gs", "hX", "wV"],
+  "parent-complaint": ["lqs", "D", "X", "O"],
+  "boundary-night": ["lwf", "sq", "D", "pD"],
+  "personal-contact": ["wqs", "V", "XO", "DT"],
+  "discount-ask": ["hsq", "V", "hX", "XD"],
+  "teacher-public": ["lfwq", "D", "X", "O"],
+  "perfect-overload": ["rga", "XD", "s", "V"],
+  "silent-student": ["ewf", "l", "X", "O"],
+  "sarcasm": ["lcg", "X", "XO", "V"],
+  "friend-cheats": ["lm", "TD", "O", "V"],
+  "curator-error": ["qrw", "DV", "X", "gD"],
+  "gift": ["wq", "V", "X", "V"],
+  "chat-insult": ["lwq", "D", "X", "e"],
+  "alarm2": ["lwf", "fw", "s", "pD"],
 };
 
 export const TAGS: Record<string, Feat[][]> = Object.fromEntries(Object.entries(T).map(([id, opts]) => [id, opts.map((s) => s.split("") as Feat[])]));
