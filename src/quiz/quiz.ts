@@ -110,6 +110,16 @@ function themeQuestion(student: Student, n: number, rng: () => number): Question
   return { event, tags: options.map(() => []), right: [order.indexOf(right)] };
 }
 
+/** Shuffles the answers of a question so the right one is not always where the author put it. */
+function shuffled(q: Question, rng: () => number): Question {
+  const order = q.event.options.map((_, i) => i).sort(() => rng() - 0.5);
+  return {
+    event: { ...q.event, options: order.map((i) => q.event.options[i]) },
+    tags: order.map((i) => q.tags[i]),
+    right: q.right.map((r) => order.indexOf(r)).sort((a, b) => a - b),
+  };
+}
+
 /** A fixed set of situations for the student: the same student and attempt always give the same quiz. */
 export function buildQuiz(student: Student, attempt = 0): Question[] {
   const rng = mulberry32(student.seed * 31 + attempt * 7 + 3);
@@ -160,7 +170,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
   while (vi < voices.length) out.push(voices[vi++]);
   out.splice(Math.min(out.length, 4), 0, themeQuestion(student, 0, rng));
   out.push(themeQuestion(student, 1, rng));
-  return out;
+  return out.map((q) => (isTheme(q) || isVoice(q) ? q : shuffled(q, rng)));
 }
 
 /** The statement in the materials behind a feature of this student, with whose it is. */
