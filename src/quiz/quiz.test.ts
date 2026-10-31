@@ -57,14 +57,14 @@ describe("phrases", () => {
 import { WOUND_ORDER, WOUNDS } from "../data/wounds";
 import { analysisOf } from "./quiz";
 describe("wounds", () => {
-  it("each sensitive theme has school behaviour and phrases, and the analysis has nine lines", () => {
+  it("each sensitive theme has school behaviour and phrases, and the analysis has ten lines", () => {
     for (const w of WOUND_ORDER) {
       expect(WOUNDS[w].school.length).toBeGreaterThan(20);
       expect(WOUNDS[w].phrases.length).toBeGreaterThanOrEqual(5);
     }
     const s = createStudent({ seed: 11, blind: false });
     const lines = analysisOf(s);
-    expect(lines.length).toBe(9);
+    expect(lines.length).toBe(10);
     expect(lines.join(" ")).not.toMatch(/\{\w+\}/);
   });
 });
@@ -86,6 +86,23 @@ describe("answer features", () => {
       expect(TAGS[e.id], e.id).toBeTruthy();
       expect(TAGS[e.id].length, e.id).toBe(e.options.length);
       for (const t of TAGS[e.id]) expect(t.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+import { buildIpr, gradeIpr } from "./ipr";
+describe("ИПР", () => {
+  it("gives full marks for the right choices and is deterministic", () => {
+    for (const mbti of TYPE_CODES) {
+      const s = createStudent({ seed: 21, mbti, blind: false });
+      const a = buildIpr(s, 0);
+      const b = buildIpr(s, 0);
+      expect(JSON.stringify(a.sections.map((x) => x.items.map((i) => i.id)))).toBe(JSON.stringify(b.sections.map((x) => x.items.map((i) => i.id))));
+      const answers = Object.fromEntries(a.questions.map((q) => [q.key, q.right]));
+      const picks = Object.fromEntries(a.sections.map((sec) => [sec.key, sec.items.filter((i) => i.ok).slice(0, sec.pick).map((i) => i.id)]));
+      const g = gradeIpr(s, a, answers, picks);
+      expect(g.points).toBe(g.max);
+      expect(g.model.length).toBeGreaterThan(10);
     }
   });
 });

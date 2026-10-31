@@ -1,13 +1,14 @@
 import { useState } from "react";
 import Build from "./pages/Build";
 import Home from "./pages/Home";
+import Ipr from "./pages/Ipr";
 import Legend from "./pages/Legend";
 import Quiz from "./pages/Quiz";
 import { createStudent } from "./game/generate";
 import type { Student } from "./game/types";
 import { LANG, setLang, tr } from "./i18n";
 
-export type View = "home" | "build" | "legend" | "quiz";
+export type View = "home" | "build" | "legend" | "quiz" | "ipr";
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -23,7 +24,8 @@ export default function App() {
       </header>
       {view === "home" && <Home random={random} build={() => setView("build")} />}
       {view === "build" && <Build done={show} back={() => setView("home")} />}
-      {view === "legend" && student && <Legend student={student} start={() => setView("quiz")} back={() => setView("home")} />}
+      {view === "legend" && student && <Legend student={student} start={() => setView("quiz")} ipr={() => setView("ipr")} back={() => setView("home")} />}
+      {view === "ipr" && student && <Ipr student={student} back={() => setView("legend")} test={() => setView("quiz")} />}
       {view === "quiz" && student && <Quiz student={student} again={() => setView("legend")} fresh={() => setView("home")} />}
     </div>
   );

@@ -4,7 +4,7 @@ import { EGO, EGO_ORDER } from "../data/ego";
 import { TYPE_EGO } from "../data/egogram";
 import { TYPES, TYPE_CODES } from "../data/mbti";
 import { WOUND_ORDER, WOUNDS, type WoundKey } from "../data/wounds";
-import { woundOf } from "../game/engine";
+import { dominantEgo, woundOf } from "../game/engine";
 import { createStudent } from "../game/generate";
 import type { EgoKey, Student } from "../game/types";
 import { tr } from "../i18n";
@@ -25,7 +25,7 @@ export default function Build({ done, back }: { done: (s: Student) => void; back
       <div className="center"><h2>{tr("Собрать ученика")}</h2></div>
       <div className="card center">
         <div style={{ display: "grid", placeItems: "center" }}>
-          <Avatar look={st.look} gender={st.gender} size={110} color={studentColor(st, true)} mood={0.5} stress={0.35} theme={woundOf(st)} />
+          <Avatar look={st.look} gender={st.gender} size={110} color={studentColor(st, true)} mood={0.5} stress={0.35} theme={woundOf(st)} outfit={dominantEgo(st)} />
         </div>
         <h3 style={{ marginTop: 8 }}>{st.name}, {st.age}</h3>
         <p className="muted small">{st.mbti} «{TYPES[st.mbti].nick}» · {EGO[top].emoji} {EGO[top].name}</p>

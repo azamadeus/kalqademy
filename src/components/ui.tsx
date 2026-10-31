@@ -4,7 +4,7 @@ import type { WoundKey } from "../data/wounds";
 import { CLOSENESS } from "../game/text";
 import { SKILLS } from "../game/career";
 import { STAGES, TOTAL_WEEKS, stageOf, closenessLevel } from "../game/engine";
-import type { Look, Quality, SkillKey, Student, TurnRecord } from "../game/types";
+import type { EgoKey, Look, Quality, SkillKey, Student, TurnRecord } from "../game/types";
 import { clamp } from "../game/rng";
 import { tr } from "../i18n";
 
@@ -12,6 +12,15 @@ const SKIN = ["#f5d0b5", "#e8b98f", "#d39b6e", "#b9784c", "#8d5a3a"];
 const HAIR = ["#2b2118", "#4a3222", "#7a4a2a", "#1a1a24", "#a0522d", "#c9a06a"];
 
 /** Body language of the cartoon avatar per sensitive theme: head position, shoulders and arms. Posture only, never body shape. */
+/** Clothes by dominant ego state: suit for the Critical Parent, cardigan for the Caring Parent, loose bright hoodie for the Free Child and so on. A style cue for the cartoon only. */
+const OUTFIT: Record<EgoKey, { fill: string }> = {
+  critical_parent: { fill: "#334155" },
+  caring_parent: { fill: "#a3b18a" },
+  adult: { fill: "#4b6a88" },
+  adapted_child: { fill: "#8b94a5" },
+  natural_child: { fill: "#fb923c" },
+};
+
 const THEME_POSE: Record<WoundKey, { head: string; body: string; arms: "none" | "cross" | "clasp" }> = {
   rejection: { head: "translate(-3 3) rotate(-4 60 60)", body: "M24 125 Q28 94 60 91 Q92 94 96 125 Z", arms: "none" },
   abandonment: { head: "translate(-1.2 -1.2) scale(1.02)", body: "M14 125 Q18 90 60 88 Q102 90 106 125 Z", arms: "clasp" },
@@ -29,8 +38,8 @@ const THEME_FACE: Record<WoundKey, { gx: number; gy: number; inner: number; pupi
 };
 
 export function Avatar({
-  look, mood = 0.6, stress = 0.3, size = 120, color, gender = "f", mark, theme,
-}: { look: Look; mood?: number; stress?: number; size?: number; color?: string; gender?: "f" | "m"; mark?: string; theme?: WoundKey }) {
+  look, mood = 0.6, stress = 0.3, size = 120, color, gender = "f", mark, theme, outfit,
+}: { look: Look; mood?: number; stress?: number; size?: number; color?: string; gender?: "f" | "m"; mark?: string; theme?: WoundKey; outfit?: EgoKey }) {
   const skin = SKIN[look.skin % SKIN.length];
   const hair = HAIR[look.hairColor % HAIR.length];
   const c = color ?? "#64748b";
@@ -54,7 +63,13 @@ export function Avatar({
       <circle cx="60" cy="60" r="58" fill={`url(#${id})`} />
       <g clipPath={`url(#c${id})`}>
         {(style === 1 || style === 5) && <path d="M32 58 Q28 20 60 20 Q92 20 88 58 L92 100 L72 100 L72 72 L48 72 L48 100 L28 100 Z" fill={hair} />}
-        <path d={P.body} fill={c} style={{ filter: "brightness(0.65)" }} />
+        {outfit === "natural_child" && <ellipse cx="60" cy="86" rx="24" ry="13" fill="#f59e0b" />}
+        <path d={P.body} fill={outfit ? OUTFIT[outfit].fill : c} style={outfit ? undefined : { filter: "brightness(0.65)" }} />
+        {outfit === "critical_parent" && <><path d="M44 90 L60 110 L52 125 L38 125 Z" fill="#111827" /><path d="M76 90 L60 110 L68 125 L82 125 Z" fill="#111827" /><path d="M52 88 L60 100 L68 88 Z" fill="#f8fafc" /><path d="M58 98 L62 98 L64 122 L56 122 Z" fill="#b91c1c" /></>}
+        {outfit === "caring_parent" && <>{[100, 108, 116].map((y) => <circle key={y} cx="60" cy={y} r="1.8" fill="#fef3c7" />)}<path d="M60 92 L60 125" stroke="#00000026" strokeWidth="1.2" /><path d="M46 92 Q60 102 74 92" stroke="#fef3c7" strokeWidth="3" fill="none" strokeLinecap="round" /></>}
+        {outfit === "adult" && <><path d="M48 90 L60 104 L72 90 L66 88 L60 94 L54 88 Z" fill="#f1f5f9" /><path d="M60 104 L60 125" stroke="#00000022" strokeWidth="1.2" /></>}
+        {outfit === "adapted_child" && <path d="M46 92 Q60 98 74 92 L74 96 Q60 103 46 96 Z" fill="#94a3b8" />}
+        {outfit === "natural_child" && <><path d="M44 112 Q60 118 76 112 L74 125 L46 125 Z" fill="#ec4899" opacity="0.85" /><circle cx="48" cy="102" r="2.2" fill="#fde68a" /><circle cx="72" cy="100" r="2.2" fill="#a7f3d0" /></>}
         <g transform={P.head || undefined}>
         <rect x="51" y="70" width="18" height="20" rx="6" fill={skin} />
         <ellipse cx="36.5" cy="58" rx="4" ry="6" fill={skin} />

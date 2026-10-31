@@ -6,14 +6,14 @@ import type { Student } from "../game/types";
 import { legendOf } from "../quiz/legend";
 import { tr } from "../i18n";
 
-export default function Legend({ student, start, back }: { student: Student; start: () => void; back: () => void }) {
+export default function Legend({ student, start, ipr, back }: { student: Student; start: () => void; ipr: () => void; back: () => void }) {
   const lg = legendOf(student);
   const ego = EGO[dominantEgo(student)];
   return (
     <div className="stack" style={{ gap: 18 }}>
       <div className="card center">
         <div style={{ display: "grid", placeItems: "center" }}>
-          <Avatar look={student.look} gender={student.gender} size={130} color={studentColor(student, true)} mood={0.5} stress={0.35} theme={woundOf(student)} />
+          <Avatar look={student.look} gender={student.gender} size={130} color={studentColor(student, true)} mood={0.5} stress={0.35} theme={woundOf(student)} outfit={dominantEgo(student)} />
         </div>
         <h2 style={{ marginTop: 10 }}>{lg.title}</h2>
         <div className="row wrap gap8" style={{ justifyContent: "center", marginTop: 8 }}>
@@ -48,6 +48,7 @@ export default function Legend({ student, start, back }: { student: Student; sta
       ))}
       <div className="row wrap" style={{ justifyContent: "center" }}>
         <button className="btn lg" onClick={start}>{tr("Начать тест")}</button>
+        <button className="btn lg ghost" onClick={ipr}>{tr("Составить ИПР")}</button>
         <button className="link" onClick={back}>{tr("Назад")}</button>
       </div>
     </div>

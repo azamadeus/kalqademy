@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Avatar, Confetti, Ring, studentColor } from "../components/ui";
 import { phrasesOf, woundPhrasesOf } from "../data/phrases";
 import { driverSays } from "../quiz/legend";
-import { woundOf } from "../game/engine";
+import { dominantEgo, woundOf } from "../game/engine";
 import { TACTICS, fmt } from "../game/text";
 import type { Student } from "../game/types";
 import { QUIZ_LENGTH, analysisOf, buildQuiz, hintFor, isTheme, isVoice, questionText } from "../quiz/quiz";
@@ -66,7 +66,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   return (
     <div className="flow">
       <header className="who">
-        <Avatar look={student.look} gender={student.gender} size={56} color={color} mood={0.6} stress={0.3} theme={woundOf(student)} />
+        <Avatar look={student.look} gender={student.gender} size={56} color={color} mood={0.6} stress={0.3} theme={woundOf(student)} outfit={dominantEgo(student)} />
         <div className="grow">
           <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
             <b>{student.name} · {student.mbti}</b>
@@ -75,7 +75,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
           <div className="thin"><i style={{ width: `${((i + (answered ? 1 : 0)) / quiz.length) * 100}%` }} /></div>
         </div>
       </header>
-      <section className="chat"><div className="chat-log" style={isTheme(q) ? { maxHeight: "none" } : undefined}><div className="msg system">{q.event.title}</div>{isTheme(q) && <div style={{ display: "grid", placeItems: "center", padding: "6px 0" }}><Avatar look={student.look} gender={student.gender} size={180} color={color} mood={0.5} stress={0.35} theme={woundOf(student)} /></div>}<div className="msg student" style={isTheme(q) ? { maxWidth: "100%" } : undefined}>{speech(q, i)}</div></div></section>
+      <section className="chat"><div className="chat-log" style={isTheme(q) ? { maxHeight: "none" } : undefined}><div className="msg system">{q.event.title}</div>{isTheme(q) && <div style={{ display: "grid", placeItems: "center", padding: "6px 0" }}><Avatar look={student.look} gender={student.gender} size={180} color={color} mood={0.5} stress={0.35} theme={woundOf(student)} outfit={dominantEgo(student)} /></div>}<div className="msg student" style={isTheme(q) ? { maxWidth: "100%" } : undefined}>{speech(q, i)}</div></div></section>
       <section className="card stack" style={{ gap: 12 }}>
         <div className="step-title">{tr("Ваш ответ")}</div>
         <div className="opts">

@@ -13,6 +13,7 @@ import { LANG, tr } from "../i18n";
 import { EGO_ORIGINAL } from "./original-kk";
 import { NEGATIVE, POSITIVE, featName, replyOf, type Feat } from "./features";
 import { needVector, needsOf, type Need } from "./needs";
+import { ATTENTIONS, POSITIONS, ROLES, SCRIPTS, label, taProfileOf } from "./profile";
 import { TAGS } from "./tags";
 
 export const QUIZ_LENGTH = 10;
@@ -39,7 +40,7 @@ export const isTheme = (q: Question) => q.event.id.startsWith("theme-");
 export const isVoice = (q: Question) => q.event.id.startsWith("voice-");
 
 const cache = new WeakMap<Student, { needs: Need[]; v: Partial<Record<Feat, number>> }>();
-function profileOf(s: Student) {
+export function profileOf(s: Student) {
   let p = cache.get(s);
   if (!p) {
     const needs = needsOf(s);
@@ -174,7 +175,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
 }
 
 /** The statement in the materials behind a feature of this student, with whose it is. */
-function evidence(student: Student, f: Feat, sign: 1 | -1): Need | undefined {
+export function evidence(student: Student, f: Feat, sign: 1 | -1): Need | undefined {
   const cands = profileOf(student).needs.filter((n) => n.f === f && Math.sign(n.w) === sign);
   return cands.sort((a, b) => Math.abs(b.w) - Math.abs(a.w))[0];
 }
@@ -227,6 +228,7 @@ export function analysisOf(student: Student): string[] {
   const low = ranked[ranked.length - 1];
   const w = WOUNDS[woundOf(student)];
   const kk = LANG === "kk";
+  const ta = taProfileOf(student);
   const motivate = (k: (typeof EGO_ORDER)[number]) => (kk && EGO_ORIGINAL[k].motivate[0]) || EGO[k].motivate[0];
   return [
     tr("Тип: {v}", { v: `${student.mbti} «${type.nick}»` }),
@@ -235,6 +237,7 @@ export function analysisOf(student: Student): string[] {
     tr("Язык тела: {v}", { v: w.pose[kk ? 1 : 0] }),
     tr("Драйверы: {v}", { v: driversOf(student.mbti).drivers.map((d) => pick(DRIVERS[d].name)).join(", ") }),
     tr("Запреты: {v}", { v: driversOf(student.mbti).bans.map((b) => pick(BANS[b])).join("; ") }),
+    tr("Профиль в ТА: {v}", { v: [label(POSITIONS[ta.position].name), label(SCRIPTS[ta.script].name), label(ROLES[ta.role].name), label(ATTENTIONS[ta.attention].name)].join("; ") }),
     tr("Работает: {v}", { v: [type.works[0], motivate(top[0]), w.works[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
     tr("Практика для развития: {v}", { v: EGO[top[0]].exercises[0] }),
     tr("Избегать: {v}", { v: [type.avoids[0], EGO[top[0]].avoid[0], w.avoids[0]].map((x) => x.replace(/\.$/, "").toLowerCase()).join("; ") }),
