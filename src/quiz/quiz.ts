@@ -79,14 +79,14 @@ function voiceLines(student: Student): string[] {
 }
 
 /** A question built from the student's inner voice; the answers are made of the replies for the features the materials name. */
-function voiceQuestion(student: Student, line: string, n: number, rng: () => number): Question | null {
+function voiceQuestion(student: Student, line: string, n: number, rng: () => number, short = false): Question | null {
   const { v } = profileOf(student);
   const pos = POSITIVE.slice().sort((a, b) => (v[b] ?? 0) - (v[a] ?? 0));
   const bad = NEGATIVE.slice().sort((a, b) => (v[a] ?? 0) - (v[b] ?? 0));
   const best = pos[n % 2];
   const second = pos[2 + (n % 2)];
   const mismatched = pos.slice().reverse();
-  const sets: Feat[][] = [[best, second], [mismatched[0], mismatched[1]], [mismatched[2]], [bad[0]]];
+  const sets: Feat[][] = short ? [[best], [mismatched[0]], [mismatched[2]], [bad[0]]] : [[best, second], [mismatched[0], mismatched[1]], [mismatched[2]], [bad[0]]];
   const order = [0, 1, 2, 3].sort(() => rng() - 0.5);
   const tags = order.map((k) => sets[k]);
   const options = tags.map((t) => ({ tactic: TACTIC_OF[t[0]], text: t.map(replyOf).join(" "), fit: 0 }));
@@ -122,12 +122,19 @@ function shuffled(q: Question, rng: () => number): Question {
 }
 
 /** A fixed set of situations for the student: the same student and attempt always give the same quiz. */
-export function buildQuiz(student: Student, attempt = 0): Question[] {
+export interface QuizOptions {
+  /** Only situations whose answers are at most this many characters (for phones in a live game). */
+  maxChars?: number;
+}
+
+export function buildQuiz(student: Student, attempt = 0, opts: QuizOptions = {}): Question[] {
+  const max = opts.maxChars ?? Infinity;
+  const fits = (e: GameEvent) => e.options.every((o) => o.text.length <= max) && e.text.length <= max + 30;
   const rng = mulberry32(student.seed * 31 + attempt * 7 + 3);
   const ego = dominantEgo(student);
   const rank = (e: GameEvent) =>
     (e.prone?.ego?.includes(ego) ? 0 : 1) + (e.prone?.letters?.some((l) => student.mbti.includes(l)) ? 0 : 1) + (familyById(student.familyId).boosts.includes(e.problem) ? 0 : 1) + (e.sharp ? -1.6 : 0) + rng() * 1.6;
-  const pool = EVENTS.filter((e) => e.id !== "first-message" && TAGS[e.id])
+  const pool = EVENTS.filter((e) => e.id !== "first-message" && TAGS[e.id] && fits(e))
     .map((e) => ({ e, r: rank(e) }))
     .sort((a, b) => a.r - b.r)
     .map((x) => x.e);
@@ -137,7 +144,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
   const used: Record<string, number> = {};
   const want = QUIZ_LENGTH - VOICE_QUESTIONS - THEME_QUESTIONS;
   const first = EVENTS.find((e) => e.id === "first-message")!;
-  const firstRight = rightOptions(student, first, TAGS[first.id]);
+  const firstRight = fits(first) ? rightOptions(student, first, TAGS[first.id]) : null;
   if (firstRight && firstRight.length === 1) { events.push({ event: first, tags: TAGS[first.id], right: firstRight }); used[first.options[firstRight[0]].tactic] = 1; }
   for (const strict of [true, false]) {
     for (const e of pool) {
@@ -158,7 +165,7 @@ export function buildQuiz(student: Student, attempt = 0): Question[] {
   const voices: Question[] = [];
   const lines = voiceLines(student);
   for (let n = 0; n < lines.length * 2 && voices.length < VOICE_QUESTIONS + (want - events.length); n++) {
-    const q = voiceQuestion(student, lines[n % lines.length], n, rng);
+    const q = voiceQuestion(student, lines[n % lines.length], n, rng, max < Infinity);
     if (q && !voices.some((x) => x.event.text === q.event.text)) voices.push(q);
   }
   // events first, with the student's own words woven in between and two theme questions near the end

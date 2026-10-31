@@ -28,6 +28,7 @@ export async function connectRoom(code: string, role: "host" | "player"): Promis
     peers: () => map(room.peers()),
     onPeers: (fn) => room.onPeers((ch) => fn(map(ch.peers))),
     close: () => { void room.leave(); },
+    myId: () => room.peers().find((p) => p.isMe)?.peer ?? "",
   };
   if (role === "host") {
     try { await room.emit("hello", { t: Date.now() }); } catch { return { ok: false, reason: "not_host" }; }

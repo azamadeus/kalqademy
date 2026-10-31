@@ -6,7 +6,7 @@ import { dominantEgo, woundOf } from "../game/engine";
 import { createStudent } from "../game/generate";
 import { fmt } from "../game/text";
 import { tr } from "../i18n";
-import { MAX_PLAYERS, newCode, pointsFor, rankPlayers, scoreMsg, trimName, type HintMsg, type Phase, type QuestionMsg, type Scores, type StateMsg } from "../live/game";
+import { MAX_PLAYERS, autoSeconds, newCode, pointsFor, rankPlayers, scoreMsgs, trimName, type HintMsg, type Phase, type QuestionMsg, type Scores, type StateMsg } from "../live/game";
 import { qrSvg } from "../live/qr";
 import { connect, type LivePeer, type Transport } from "../live/transport";
 import { COLORS, SHAPES, defaultJoinBase } from "../live/ui";
@@ -30,8 +30,9 @@ const fresh = (): Game => ({ phase: "lobby", i: 0, startAt: 0, limit: 25000, ans
 export default function LiveHost({ back }: { back: () => void }) {
   const [code, setCode] = useState(newCode);
   const [student, setStudent] = useState(() => createStudent({ seed: Math.floor(Math.random() * 900000) + 100, blind: false }));
-  const quiz = useMemo<Question[]>(() => buildQuiz(student, 0), [student]);
-  const [seconds, setSeconds] = useState(25);
+  const [shortMode, setShortMode] = useState(true);
+  const quiz = useMemo<Question[]>(() => buildQuiz(student, 0, shortMode ? { maxChars: 130 } : {}), [student, shortMode]);
+  const [seconds, setSeconds] = useState(0);
   const [base, setBase] = useState(defaultJoinBase);
   const [net, setNet] = useState<Transport | null>(null);
   const [err, setErr] = useState("");
@@ -80,7 +81,7 @@ export default function LiveHost({ back }: { back: () => void }) {
     if (s.phase === "reveal" || s.phase === "board" || s.phase === "end") {
       const h: HintMsg = { i: s.i, hint: s.hint.map((x) => x.slice(0, 200)), counts: s.counts };
       void net.emit("h", h).catch(() => {});
-      void net.emit("sc", scoreMsg(s.i, s.ranked)).catch(() => {});
+      for (const m of scoreMsgs(s.i, s.ranked)) void net.emit("sc", m).catch(() => {});
     }
   };
   const broadcastRef = useRef(broadcast);
@@ -115,7 +116,8 @@ export default function LiveHost({ back }: { back: () => void }) {
 
   function startQuestion(i: number) {
     const s = g.current;
-    s.phase = "question"; s.i = i; s.startAt = Date.now(); s.limit = seconds * 1000; s.answers = new Map(); s.counts = [0, 0, 0, 0]; s.hint = []; s.right = quiz[i].right;
+    const chars = questionText(quiz[i], student).length + quiz[i].event.options.reduce((a, o) => a + fmt(o.text, student).length, 0);
+    s.phase = "question"; s.i = i; s.startAt = Date.now(); s.limit = (seconds || autoSeconds(chars)) * 1000; s.answers = new Map(); s.counts = [0, 0, 0, 0]; s.hint = []; s.right = quiz[i].right;
     s.scores.gained = {};
     broadcast(); bump();
   }
@@ -187,16 +189,21 @@ export default function LiveHost({ back }: { back: () => void }) {
             <div className="row wrap">
               <label className="small muted">{tr("Время на ответ")}</label>
               <div className="seg">
-                {[15, 25, 40].map((v) => <button key={v} className={seconds === v ? "on" : ""} onClick={() => setSeconds(v)}>{v}</button>)}
+                {[0, 20, 40, 60].map((v) => <button key={v} className={seconds === v ? "on" : ""} onClick={() => setSeconds(v)}>{v === 0 ? tr("Авто") : v}</button>)}
               </div>
             </div>
+            <label className="row small" style={{ cursor: "pointer" }}>
+              <input type="checkbox" checked={shortMode} onChange={(e) => setShortMode(e.target.checked)} />
+              {tr("Короткие вопросы (удобнее читать с телефона)")}
+            </label>
           </div>
 
           <div className="card stack" style={{ gap: 8 }}>
             <div className="step-title">{tr("Игроки")}: {players.length}</div>
             <div className="row wrap gap8">
               {players.length === 0 && <span className="muted small">{tr("Пока никого. Покажите QR-код.")}</span>}
-              {players.map((p) => <span key={p.id} className="pill">{trimName(p.presence.name)}</span>)}
+              {players.slice(0, 60).map((p) => <span key={p.id} className="pill">{trimName(p.presence.name)}</span>)}
+              {players.length > 60 && <span className="pill">+{players.length - 60}</span>}
             </div>
             <button className="btn lg block" disabled={players.length === 0 || !net} onClick={() => startQuestion(0)}>{tr("Начать игру")}</button>
           </div>

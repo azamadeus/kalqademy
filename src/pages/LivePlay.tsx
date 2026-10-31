@@ -13,7 +13,8 @@ export default function LivePlay({ code, back }: { code: string; back: () => voi
   const [st, setSt] = useState<StateMsg | null>(null);
   const [q, setQ] = useState<QuestionMsg | null>(null);
   const [h, setH] = useState<HintMsg | null>(null);
-  const [sc, setSc] = useState<ScoreMsg | null>(null);
+  const [sc, setSc] = useState<{ i: number; board: [string, number][]; s: ScoreMsg["s"] } | null>(null);
+  const parts = useRef<{ i: number; got: Map<number, ScoreMsg> }>({ i: -1, got: new Map() });
   const [mine, setMine] = useState<number | null>(null);
   const [leftMs, setLeftMs] = useState(0);
   const net = useRef<Transport | null>(null);
@@ -37,7 +38,13 @@ export default function LivePlay({ code, back }: { code: string; back: () => voi
     t.on("st", (d) => { const m = d as StateMsg; setSt(m); deadline.current = Date.now() + m.endsIn; });
     t.on("q", (d) => setQ(d as QuestionMsg));
     t.on("h", (d) => setH(d as HintMsg));
-    t.on("sc", (d) => setSc(d as ScoreMsg));
+    t.on("sc", (d) => {
+      const m = d as ScoreMsg;
+      if (parts.current.i !== m.i) parts.current = { i: m.i, got: new Map() };
+      parts.current.got.set(m.part, m);
+      const all = [...parts.current.got.values()].sort((a, b) => a.part - b.part);
+      setSc({ i: m.i, board: all[0]?.board ?? [], s: all.flatMap((x) => x.s) });
+    });
     t.presence({ kind: "player", name: n, q: -1, a: -1 });
     setStatus("in");
   }
@@ -54,7 +61,7 @@ export default function LivePlay({ code, back }: { code: string; back: () => voi
     if (qi !== lastQ.current) { lastQ.current = qi; if (qi >= 0) setMine(null); }
   }, [qi]);
 
-  const myId = short(net.current?.peers().find((p) => p.isMe)?.id ?? "");
+  const myId = short(net.current?.myId() ?? "");
   const me = sc && sc.i === st?.i ? sc.s.find((x) => x[0] === myId) : undefined;
 
   if (status === "name" || status === "connecting") {

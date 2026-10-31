@@ -1,6 +1,12 @@
 /** Pure parts of the live (Kahoot-style) mode. */
 export const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-export const MAX_PLAYERS = 50;
+export const MAX_PLAYERS = 300;
+
+/** Time to read and answer: about 15 characters a second plus a few seconds to tap, between 20 and 60 s. */
+export const autoSeconds = (chars: number): number => Math.min(60, Math.max(20, Math.round(8 + chars / 15)));
+
+/** Every message stays well under 4 KiB (the artifact room limit); larger lists go out in chunks. */
+export const CHUNK = 100;
 
 export const newCode = (): string => Array.from({ length: 4 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 
@@ -32,9 +38,12 @@ export interface QuestionMsg { i: number; title: string; text: string; options: 
 export interface HintMsg { i: number; hint: string[]; counts: number[] }
 export interface ScoreMsg {
   i: number;
-  /** Top of the board: [name, score]. */
+  /** Chunk number and how many chunks there are. */
+  part: number;
+  parts: number;
+  /** Top of the board: [name, score] (first chunk only). */
   board: [string, number][];
-  /** Every player: [short id, score, gained in this question, rank]. */
+  /** Players of this chunk: [short id, score, gained in this question, rank]. */
   s: [string, number, number, number][];
 }
 
@@ -51,8 +60,13 @@ export function rankPlayers(scores: Scores, ids: string[]): { id: string; name: 
   return rows.map((r, k) => ({ ...r, rank: k + 1 }));
 }
 
-export function scoreMsg(i: number, ranked: ReturnType<typeof rankPlayers>): ScoreMsg {
-  return { i, board: ranked.slice(0, 8).map((r) => [r.name, r.score]), s: ranked.map((r) => [short(r.id), r.score, r.gained, r.rank]) };
+export function scoreMsgs(i: number, ranked: ReturnType<typeof rankPlayers>): ScoreMsg[] {
+  const parts = Math.max(1, Math.ceil(ranked.length / CHUNK));
+  return Array.from({ length: parts }, (_, part) => ({
+    i, part, parts,
+    board: part === 0 ? ranked.slice(0, 8).map((r) => [r.name, r.score] as [string, number]) : [],
+    s: ranked.slice(part * CHUNK, (part + 1) * CHUNK).map((r) => [short(r.id), r.score, r.gained, r.rank] as [string, number, number, number]),
+  }));
 }
 
 export const bytes = (x: unknown) => new TextEncoder().encode(JSON.stringify(x)).length;

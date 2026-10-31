@@ -14,6 +14,8 @@ export interface Transport {
   peers(): LivePeer[];
   onPeers(fn: (peers: LivePeer[]) => void): () => void;
   close(): void;
+  /** This connection's own id (players use it to find their row in the score chunks). */
+  myId(): string;
 }
 
 export type TransportResult = { ok: true; t: Transport } | { ok: false; reason: "unavailable" | "not_host" | "no_room" | "full" };

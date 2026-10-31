@@ -11,20 +11,29 @@ function hostToken(code: string): string {
   }
 }
 
+type Inbound = { t: string; id?: string; code?: string; topic?: string; data?: unknown; presence?: Record<string, unknown>; peers?: { id: string; presence: Record<string, unknown> }[] };
+
 export function connectWs(url: string, code: string, role: "host" | "player"): Promise<TransportResult> {
   return new Promise((resolve) => {
     const ws = new WebSocket(url);
     let myId = "";
-    let peers: LivePeer[] = [];
+    const peerMap = new Map<string, LivePeer>();
+    let snapshot: LivePeer[] = [];
     const topics = new Map<string, Set<(d: unknown) => void>>();
     const peerFns = new Set<(p: LivePeer[]) => void>();
     let done = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const finish = (r: TransportResult) => { if (!done) { done = true; resolve(r); } };
+    // many answers arrive at once: tell the page at most ten times a second
+    const notify = () => {
+      if (timer) return;
+      timer = setTimeout(() => { timer = null; snapshot = [...peerMap.values()]; peerFns.forEach((f) => f(snapshot)); }, 100);
+    };
     ws.onopen = () => ws.send(JSON.stringify({ t: "join", room: code, role, token: role === "host" ? hostToken(code) : undefined }));
     ws.onerror = () => finish({ ok: false, reason: "unavailable" });
     ws.onclose = () => finish({ ok: false, reason: "unavailable" });
     ws.onmessage = (ev) => {
-      let m: { t: string; id?: string; code?: string; topic?: string; data?: unknown; peers?: { id: string; presence: Record<string, unknown> }[] };
+      let m: Inbound;
       try { m = JSON.parse(String(ev.data)); } catch { return; }
       if (m.t === "error") return finish({ ok: false, reason: m.code === "no_room" || m.code === "full" || m.code === "not_host" ? m.code : "unavailable" });
       if (m.t === "joined") {
@@ -34,17 +43,17 @@ export function connectWs(url: string, code: string, role: "host" | "player"): P
           emit: async (topic, data) => { ws.send(JSON.stringify({ t: "emit", topic, data })); },
           on: (topic, fn) => { const s = topics.get(topic) ?? new Set(); s.add(fn); topics.set(topic, s); return () => s.delete(fn); },
           presence: (patch) => ws.send(JSON.stringify({ t: "presence", patch })),
-          peers: () => peers,
-          onPeers: (fn) => { peerFns.add(fn); fn(peers); return () => peerFns.delete(fn); },
+          peers: () => snapshot,
+          onPeers: (fn) => { peerFns.add(fn); fn(snapshot); return () => peerFns.delete(fn); },
           close: () => ws.close(),
+          myId: () => myId,
         };
         return finish({ ok: true, t });
       }
       if (m.t === "msg" && m.topic) topics.get(m.topic)?.forEach((f) => f(m.data));
-      if (m.t === "peers" && m.peers) {
-        peers = m.peers.map((p) => ({ id: p.id, isMe: p.id === myId, presence: p.presence }));
-        peerFns.forEach((f) => f(peers));
-      }
+      else if (m.t === "peers" && m.peers) { peerMap.clear(); for (const p of m.peers) peerMap.set(p.id, { id: p.id, isMe: false, presence: p.presence }); notify(); }
+      else if (m.t === "peer" && m.id) { peerMap.set(m.id, { id: m.id, isMe: false, presence: m.presence ?? {} }); notify(); }
+      else if (m.t === "left" && m.id) { peerMap.delete(m.id); notify(); }
     };
   });
 }
