@@ -343,3 +343,15 @@ body { background: var(--bg); }
 .sliders label { display: grid; gap: 4px; }
 .fold { padding: 16px 22px; }
 .fold > summary { font-weight: 700; color: var(--text); }
+
+/* live (Kahoot-style) mode */
+.live-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lopt { display: flex; gap: 10px; align-items: flex-start; padding: 16px; border-radius: 14px; color: #fff; text-align: left; font-size: 1.02rem; border: 0; position: relative; }
+.lopt b { font-size: 1.4rem; line-height: 1; }
+.lopt i { position: absolute; right: 12px; top: 8px; font-style: normal; font-weight: 900; font-size: 1.3rem; }
+.lopt.dim { opacity: 0.35; }
+.lopt.right { outline: 4px solid #fff; }
+.lopt.play { width: 100%; min-height: 64px; }
+.lrow { display: flex; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--panel2); }
+.lrow b { width: 24px; text-align: center; }
+@media (max-width: 640px) { .live-opts { grid-template-columns: 1fr; } }

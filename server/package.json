@@ -1,0 +1,8 @@
+{
+  "name": "kalqademy-relay",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": { "start": "node relay.mjs" },
+  "dependencies": { "ws": "^8.18.0" }
+}

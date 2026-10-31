@@ -3,3 +3,4 @@ dist
 *.local
 .DS_Store
 knowledge/raw/
+server/node_modules
