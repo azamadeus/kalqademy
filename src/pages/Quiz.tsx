@@ -15,12 +15,13 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
   const [answers, setAnswers] = useState<number[]>([]);
   const [chosen, setChosen] = useState<number | null>(null);
   const color = studentColor(student, true);
+  const icon = (q: (typeof quiz)[number], o: number) => (q.event.id.startsWith("voice") ? "" : `${TACTICS[q.event.options[o].tactic].icon} `);
   const phrases = phrasesOf(student.mbti);
   const wPhrases = woundPhrasesOf(woundOf(student));
   const dPhrases = driverSays(student.mbti);
   /** The student's message, followed by a phrase typical for their type (not in a safety-critical situation). */
   const speech = (q: (typeof quiz)[number], n: number) =>
-    q.event.serious || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 3 === 1 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : n % 3 === 2 && dPhrases.length ? dPhrases[(n + student.seed) % dPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
+    q.event.serious || q.event.id.startsWith("voice") || !phrases.length ? questionText(q, student) : `${questionText(q, student)} ${fmt(n % 3 === 1 && wPhrases.length ? wPhrases[(n + student.seed) % wPhrases.length] : n % 3 === 2 && dPhrases.length ? dPhrases[(n + student.seed) % dPhrases.length] : phrases[(n + student.seed) % phrases.length], student)}.`;
 
   const retry = () => { setAttempt((a) => a + 1); setI(0); setAnswers([]); setChosen(null); };
 
@@ -48,8 +49,8 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
           <div key={k} className="card hint">
             <div className="step-title">{k + 1}. {q.event.title}</div>
             <div className="msg student" style={{ maxWidth: "100%" }}>{questionText(q, student)}</div>
-            <p className="small" style={{ margin: "12px 0 4px" }}>❌ {tr("Вы ответили:")} <span className="muted">{TACTICS[q.event.options[a].tactic].icon} {fmt(q.event.options[a].text, student)}</span></p>
-            <p className="small">✅ {tr("Лучше:")} {TACTICS[q.event.options[q.right[0]].tactic].icon} {fmt(q.event.options[q.right[0]].text, student)}</p>
+            <p className="small" style={{ margin: "12px 0 4px" }}>❌ {tr("Вы ответили:")} <span className="muted">{icon(q, a)}{fmt(q.event.options[a].text, student)}</span></p>
+            <p className="small">✅ {tr("Лучше:")} {icon(q, q.right[0])}{fmt(q.event.options[q.right[0]].text, student)}</p>
             {hintFor(student, q, a, k).map((l, n) => <div key={n} className="quote">{l}</div>)}
           </div>
         ))}
@@ -82,7 +83,7 @@ export default function Quiz({ student, again, fresh }: { student: Student; agai
             const state = !answered ? "" : n === chosen ? (q.right.includes(n) ? "ok" : "no") : "";
             return (
               <button key={n} className={`opt ${state}`} disabled={answered && n !== chosen} onClick={() => pick(n)}>
-                <span className="tag">{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}</span>
+                {!q.event.id.startsWith("voice") && <span className="tag">{TACTICS[o.tactic].icon} {TACTICS[o.tactic].name}</span>}
                 <div>{fmt(o.text, student)}</div>
               </button>
             );

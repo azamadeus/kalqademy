@@ -76,3 +76,15 @@ describe("drivers", () => {
     for (const k of Object.keys(DRIVERS) as (keyof typeof DRIVERS)[]) expect(DRIVERS[k].says.length).toBeGreaterThanOrEqual(3);
   });
 });
+
+import { EVENTS } from "../data/events";
+import { TAGS } from "./tags";
+describe("answer features", () => {
+  it("every situation has features for each of its options", () => {
+    for (const e of EVENTS) {
+      expect(TAGS[e.id], e.id).toBeTruthy();
+      expect(TAGS[e.id].length, e.id).toBe(e.options.length);
+      for (const t of TAGS[e.id]) expect(t.length).toBeGreaterThan(0);
+    }
+  });
+});
