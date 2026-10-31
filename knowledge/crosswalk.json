@@ -1,0 +1,100 @@
+{
+  "note": "Соответствия между моделями это моя интерпретация для тренировки, не утверждения авторов.",
+  "wound_to_ta": {
+    "rejection": {
+      "ta_position": "Я не ок, ты ок",
+      "ego": [
+        "adapted_child"
+      ],
+      "driver": [
+        "perfect",
+        "hurry"
+      ],
+      "mask": "Беглец",
+      "maxwell": [
+        3,
+        23,
+        5
+      ]
+    },
+    "abandonment": {
+      "ta_position": "Я не ок, ты ок",
+      "ego": [
+        "adapted_child",
+        "natural_child"
+      ],
+      "driver": [
+        "please",
+        "try"
+      ],
+      "mask": "Зависимый",
+      "maxwell": [
+        2,
+        15,
+        19
+      ]
+    },
+    "humiliation": {
+      "ta_position": "Я не ок, ты ок",
+      "ego": [
+        "caring_parent",
+        "adapted_child"
+      ],
+      "driver": [
+        "please",
+        "strong"
+      ],
+      "mask": "Мазохист",
+      "maxwell": [
+        13,
+        23,
+        3
+      ]
+    },
+    "betrayal": {
+      "ta_position": "Я ок, ты не ок",
+      "ego": [
+        "critical_parent",
+        "adult"
+      ],
+      "driver": [
+        "strong",
+        "perfect"
+      ],
+      "mask": "Контролёр",
+      "maxwell": [
+        12,
+        6,
+        11
+      ]
+    },
+    "injustice": {
+      "ta_position": "Я ок, ты не ок",
+      "ego": [
+        "critical_parent"
+      ],
+      "driver": [
+        "perfect"
+      ],
+      "mask": "Ригидный",
+      "maxwell": [
+        12,
+        7,
+        23
+      ]
+    }
+  },
+  "maxwell25_vs_profile_caution": {
+    "5_praise_publicly": "плохо для отвержения и унижения",
+    "11_share_secret": "хорошо для предательства, осторожно с границами куратора",
+    "13_look_away_from_mirror": "риск для самопожертвователей",
+    "17_help_first": "риск гиперопеки для зависимого"
+  },
+  "levels_of_influence_vs_trust_ladder": {
+    "position": "отстранённо",
+    "permission": "нейтрально, затем хорошо",
+    "production": "хорошо",
+    "people_development": "очень тепло",
+    "pinnacle": "наставник наставников"
+  }
+}
